@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS records (
   category TEXT NOT NULL,
   description TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NULL,
   deleted_at TIMESTAMP WITH TIME ZONE DEFAULT NULL
 );
 -- +goose StatementEnd
