@@ -17,7 +17,7 @@ const (
 
 type Record struct {
 	ID          int64           `db:"id" json:"id"`
-	UserID      string       `db:"user_id" json:"user_id"`
+	UserID      string          `db:"user_id" json:"user_id"`
 	Amount      decimal.Decimal `db:"amount" json:"amount"`
 	TxnType     TxnType         `db:"txn_type" json:"txn_type"`
 	Category    string          `db:"category" json:"category"`
@@ -28,31 +28,33 @@ type Record struct {
 }
 
 type RecordFilters struct {
-	TxnType     string
-	Category    string
-	From        time.Time
-	To          time.Time
-	ShowDeleted bool
-	Ascending   bool
+	TxnType     string `json:"txn_type"`
+	Category    string `json:"category"`
+	From        time.Time `json:"from"`
+	To          time.Time `json:"to"`
+	ShowDeleted bool	`json:"show_deleted"`
+	Ascending   bool	`json:"ascending"`
 }
 
-func (s *service) GetRecords(ctx context.Context, userID string, filters *RecordFilters) ([]Record, error) {
-	query := `SELECT id, user_id, amount, category, description, created_at, deleted_at
+func (s *service) GetRecords(ctx context.Context, filters *RecordFilters) ([]Record, error) {
+	query := `SELECT id, user_id, amount, 
+						 txn_type, category, description,
+						 created_at, updated_at, deleted_at
 						FROM records
-						WHERE user_id = $1
+						WHERE 1=1 
 						`
-	args := []any{userID}
+	args := []any{}
 
-	i := 2
+	i := 1
 
 	if filters.TxnType != "" {
-		query += fmt.Sprintf("AND txn_type = $%d", i)
+		query += fmt.Sprintf(" AND txn_type = $%d", i)
 		args = append(args, filters.TxnType)
 		i++
 	}
 
 	if filters.Category != "" {
-		query += fmt.Sprintf("AND category = $%d", i)
+		query += fmt.Sprintf(" AND category = $%d", i)
 		args = append(args, filters.Category)
 		i++
 	}
@@ -78,7 +80,7 @@ func (s *service) GetRecords(ctx context.Context, userID string, filters *Record
 	} else {
 		query += " ORDER BY created_at ASC"
 	}
-	rows, err := s.db.QueryContext(ctx, query, args)
+	rows, err := s.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}

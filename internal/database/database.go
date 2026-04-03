@@ -22,6 +22,22 @@ type Service interface {
 	// Close terminates the database connection.
 	// It returns an error if the connection cannot be closed.
 	Close() error
+
+	// Dashboard methods
+	GetDashboardSummary(ctx context.Context, period PeriodType) (DashboardSummary, error)
+
+	// Record methods
+	GetRecords(ctx context.Context, filters *RecordFilters) ([]Record, error)
+	CreateRecord(ctx context.Context, userID string, record Record) (int64, error)
+	UpdateRecord(ctx context.Context, id int64, updates Record) error
+	DeleteRecord(ctx context.Context, id int64) error
+
+	// User methods
+	CreateUser(ctx context.Context, user User) (string, error)
+	ToggleUserStatus(ctx context.Context, userID string) error
+	AssignUserRole(ctx context.Context, userID string, role RoleType) error
+	GetUserByEmail(ctx context.Context, email string) (AuthUser, error)
+	GetUserById(ctx context.Context, userID string) (AuthUser, error)
 }
 
 type service struct {
