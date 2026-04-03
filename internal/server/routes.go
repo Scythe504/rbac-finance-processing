@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/scythe504/zorvyn-rbac-finance/internal/database"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
@@ -17,6 +18,28 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.HandleFunc("/", s.HelloWorldHandler)
 
 	r.HandleFunc("/health", s.healthHandler)
+
+	apiRoutesV1 := r.PathPrefix("/api/v1").Subrouter()
+
+	authRoutes := apiRoutesV1.PathPrefix("/auth").Subrouter()
+	authRoutes.HandleFunc("/register", s.registerUser).Methods("POST")
+	authRoutes.HandleFunc("/login", s.loginUser).Methods("POST")
+
+	// Admin, Analyst, Viewer
+	protectedRoutes := apiRoutesV1.NewRoute().Subrouter()
+	protectedRoutes.Use(s.authMiddleWare)
+	protectedRoutes.HandleFunc("/me", s.getUserDetails).Methods("GET")
+
+	// Admin, Analyst
+	analystRoutes := protectedRoutes.NewRoute().Subrouter()
+	analystRoutes.Use(s.requireRole(database.RoleAnalyst, database.RoleAdmin))
+	analystRoutes.HandleFunc("/records", s.getRecords).Methods("GET")
+
+	// Admin Only
+	adminRoutes := protectedRoutes.NewRoute().Subrouter()
+	adminRoutes.Use(s.requireRole(database.RoleAdmin))
+	adminRoutes.HandleFunc("/users/{id}/role", s.setUserRole).Methods("PATCH")
+	adminRoutes.HandleFunc("/users/{id}/status", s.toggleUserStatus).Methods("PATCH")
 
 	return r
 }
