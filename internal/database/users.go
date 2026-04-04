@@ -20,6 +20,7 @@ const (
 
 type AuthUser struct {
 	ID       string
+	Name     string
 	Email    string
 	Password string
 	Role     RoleType
@@ -80,22 +81,22 @@ func (s *service) AssignUserRole(ctx context.Context, userID string, role RoleTy
 }
 
 func (s *service) GetUserByEmail(ctx context.Context, email string) (AuthUser, error) {
-	query := `SELECT id, email, password, role
+	query := `SELECT id, name, email, password, role
 						FROM users
 						WHERE email = $1 AND deleted_at IS NULL AND is_active = true`
 	var authUser AuthUser
-	err := s.db.QueryRowContext(ctx, query, email).Scan(&authUser.ID, &authUser.Email, &authUser.Password, &authUser.Role)
+	err := s.db.QueryRowContext(ctx, query, email).Scan(&authUser.ID,&authUser.Name, &authUser.Email, &authUser.Password, &authUser.Role)
 
 	return authUser, err
 }
 
 func (s *service) GetUserById(ctx context.Context, userID string) (AuthUser, error) {
-	query := `SELECT id, email, password, role
+	query := `SELECT id, name, email, password, role
 						FROM users
 						WHERE id = $1 AND deleted_at IS NULL AND is_active = true`
 	var authUser AuthUser
 
-	err := s.db.QueryRowContext(ctx, query, userID).Scan(&authUser.ID, &authUser.Email, &authUser.Password, &authUser.Role)
+	err := s.db.QueryRowContext(ctx, query, userID).Scan(&authUser.ID, &authUser.Name, &authUser.Email, &authUser.Password, &authUser.Role)
 
 	return authUser, err
 }

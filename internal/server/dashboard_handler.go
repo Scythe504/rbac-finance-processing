@@ -11,6 +11,9 @@ import (
 func (s *Server) getDashboardSummary(w http.ResponseWriter, r *http.Request) {
 	period := r.URL.Query().Get("period")
 	safePeriod := database.PeriodType(strings.ToLower(period))
+	if safePeriod == "" {
+		safePeriod = database.PeriodWeekly
+	}
 	if !utils.ValidDashboardQueryPeriod(database.PeriodType(safePeriod)) {
 		utils.WriteError(w, http.StatusBadRequest, "Invalid Query Parameter - period")
 		return

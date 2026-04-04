@@ -13,11 +13,23 @@ import (
 type PeriodType string
 
 const (
-	PeriodWeekly  PeriodType = "day"
-	PeriodMonthly PeriodType = "month"
-	PeriodYearly  PeriodType = "year"
-	PeriodAllTime PeriodType = "quarter"
+	PeriodWeekly  PeriodType = "weekly"
+	PeriodMonthly PeriodType = "monthly"
+	PeriodYearly  PeriodType = "yearly"
+	PeriodAllTime PeriodType = "all"
 )
+
+type PeriodConfig struct {
+	GroupBy string // for SQL DATE_TRUNC
+	Label   string // for response
+}
+
+var PeriodConfigs = map[PeriodType]PeriodConfig{
+	PeriodWeekly:  {GroupBy: "day", Label: "daily"},
+	PeriodMonthly: {GroupBy: "day", Label: "daily"},
+	PeriodYearly:  {GroupBy: "month", Label: "monthly"},
+	PeriodAllTime: {GroupBy: "quarter", Label: "quarterly"},
+}
 
 type BalanceTotals struct {
 	TotalIncome  decimal.Decimal
@@ -39,6 +51,7 @@ type TrendsEntry struct {
 
 type DashboardSummary struct {
 	Period           PeriodType       `json:"period"`
+	GroupedBy        string           `json:"grouped_by"`
 	TotalIncome      decimal.Decimal  `json:"total_income"`
 	TotalExpense     decimal.Decimal  `json:"total_expense"`
 	NetBalance       decimal.Decimal  `json:"net_balance"`
@@ -126,6 +139,7 @@ func (s *service) fetchTrends(
 	to time.Time,
 	period PeriodType,
 ) ([]TrendsEntry, error) {
+	config := PeriodConfigs[period]
 	whereClauses, args := whereClauseBuilder(from, to)
 	query := fmt.Sprintf(`SELECT 
 			DATE_TRUNC('%s', created_at) AS date,
@@ -134,14 +148,14 @@ func (s *service) fetchTrends(
 		FROM records
 		WHERE %s
 		GROUP BY date
-		ORDER BY date ASC`, period, strings.Join(whereClauses, " AND "))
+		ORDER BY date ASC`, config.GroupBy, strings.Join(whereClauses, " AND "))
 
 	rows, err := s.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	
+
 	var trendEntries []TrendsEntry
 
 	for rows.Next() {
@@ -243,6 +257,7 @@ func (s *service) GetDashboardSummary(ctx context.Context, period PeriodType) (D
 
 	dashboardSummary := DashboardSummary{
 		Period:           period,
+		GroupedBy:        PeriodConfigs[period].GroupBy,
 		TotalIncome:      balanceTotals.TotalIncome,
 		TotalExpense:     balanceTotals.TotalExpense,
 		NetBalance:       balanceTotals.NetBalance,

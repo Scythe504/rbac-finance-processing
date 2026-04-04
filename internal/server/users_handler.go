@@ -154,6 +154,7 @@ func (s *Server) getUserDetails(w http.ResponseWriter, r *http.Request) {
 
 	utils.WriteJSON(w, http.StatusOK, map[string]string{
 		"user_id": user.ID,
+		"name":    user.Name,
 		"email":   user.Email,
 		"role":    string(user.Role),
 	})

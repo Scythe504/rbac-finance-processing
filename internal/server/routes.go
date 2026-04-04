@@ -30,7 +30,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	protectedRoutes.Use(s.authMiddleWare)
 	protectedRoutes.HandleFunc("/me", s.getUserDetails).Methods("GET")
 	protectedRoutes.HandleFunc("/dashboard", s.getDashboardSummary).Methods("GET")
-
+	
 	// Admin, Analyst
 	analystRoutes := protectedRoutes.NewRoute().Subrouter()
 	analystRoutes.Use(s.requireRole(database.RoleAnalyst, database.RoleAdmin))
