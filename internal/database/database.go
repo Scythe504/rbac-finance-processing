@@ -27,6 +27,7 @@ type Service interface {
 	GetDashboardSummary(ctx context.Context, period PeriodType) (DashboardSummary, error)
 
 	// Record methods
+	GetRecord(ctx context.Context, recordID int64) (Record, error) 
 	GetRecords(ctx context.Context, filters *RecordFilters) ([]Record, error)
 	CreateRecord(ctx context.Context, userID string, record Record) (int64, error)
 	UpdateRecord(ctx context.Context, id int64, updates Record) error

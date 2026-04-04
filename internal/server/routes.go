@@ -29,17 +29,22 @@ func (s *Server) RegisterRoutes() http.Handler {
 	protectedRoutes := apiRoutesV1.NewRoute().Subrouter()
 	protectedRoutes.Use(s.authMiddleWare)
 	protectedRoutes.HandleFunc("/me", s.getUserDetails).Methods("GET")
+	protectedRoutes.HandleFunc("/dashboard", s.getDashboardSummary).Methods("GET")
 
 	// Admin, Analyst
 	analystRoutes := protectedRoutes.NewRoute().Subrouter()
 	analystRoutes.Use(s.requireRole(database.RoleAnalyst, database.RoleAdmin))
 	analystRoutes.HandleFunc("/records", s.getRecords).Methods("GET")
+	analystRoutes.HandleFunc("/records/{id}", s.getRecord).Methods("GET")
 
 	// Admin Only
 	adminRoutes := protectedRoutes.NewRoute().Subrouter()
 	adminRoutes.Use(s.requireRole(database.RoleAdmin))
 	adminRoutes.HandleFunc("/users/{id}/role", s.setUserRole).Methods("PATCH")
 	adminRoutes.HandleFunc("/users/{id}/status", s.toggleUserStatus).Methods("PATCH")
+	adminRoutes.HandleFunc("/records/{id}", s.updateRecord).Methods("PATCH")
+	adminRoutes.HandleFunc("/records/{id}", s.deleteRecord).Methods("DELETE")
+	adminRoutes.HandleFunc("/records", s.createRecord).Methods("POST")
 
 	return r
 }

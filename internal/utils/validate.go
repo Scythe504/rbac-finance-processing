@@ -19,6 +19,21 @@ func IsValidRole(role string) bool {
 	}
 }
 
+func ValidDashboardQueryPeriod(period database.PeriodType) bool {
+	switch period {
+	case database.PeriodWeekly:
+		return true
+	case database.PeriodMonthly:
+		return true
+	case database.PeriodYearly:
+		return true
+	case database.PeriodAllTime:
+		return true
+	default:
+		return false
+	}
+}
+
 func ParseTimeParam(s string) (time.Time, error) {
 	if s == "" {
 		return time.Time{}, nil

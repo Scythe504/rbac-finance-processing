@@ -28,12 +28,31 @@ type Record struct {
 }
 
 type RecordFilters struct {
-	TxnType     string `json:"txn_type"`
-	Category    string `json:"category"`
+	TxnType     string    `json:"txn_type"`
+	Category    string    `json:"category"`
 	From        time.Time `json:"from"`
 	To          time.Time `json:"to"`
-	ShowDeleted bool	`json:"show_deleted"`
-	Ascending   bool	`json:"ascending"`
+	ShowDeleted bool      `json:"show_deleted"`
+	Ascending   bool      `json:"ascending"`
+}
+
+func (s *service) GetRecord(ctx context.Context, recordID int64) (Record, error) {
+	query := `SELECT id, user_id, amount, 
+						 txn_type, category, description,
+						 created_at, updated_at, deleted_at
+						FROM records
+						WHERE id=$1
+						AND deleted_at IS NULL
+						`
+	var r Record
+	if err := s.db.QueryRowContext(ctx, query, recordID).Scan(
+		&r.ID, &r.UserID, &r.Amount,
+		&r.TxnType, &r.Category, &r.Description,
+		&r.CreatedAt, &r.UpdatedAt, &r.DeletedAt,
+	); err != nil {
+		return r, err
+	}
+	return r, nil
 }
 
 func (s *service) GetRecords(ctx context.Context, filters *RecordFilters) ([]Record, error) {

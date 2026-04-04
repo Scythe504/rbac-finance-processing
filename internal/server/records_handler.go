@@ -1,14 +1,42 @@
 package server
 
 import (
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 
+	"github.com/gorilla/mux"
 	"github.com/scythe504/zorvyn-rbac-finance/internal/database"
 	"github.com/scythe504/zorvyn-rbac-finance/internal/utils"
 )
+
+func (s *Server) getRecord(w http.ResponseWriter, r *http.Request) {
+	recordID, err := strconv.ParseInt(mux.Vars(r)["id"], 10, 64)
+	if err != nil {
+		utils.LogError("getRecord", err)
+		utils.WriteError(w, http.StatusInternalServerError, "Internal Server Error")
+		return
+	}
+
+	record, err := s.db.GetRecord(r.Context(), recordID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			utils.WriteError(w, http.StatusNotFound, "Record not found")
+			return
+		}
+		utils.LogError("getRecord", err)
+		utils.WriteError(w, http.StatusInternalServerError, "Internal Server Error")
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, map[string]any{
+		"data": record,
+	})
+}
 
 func (s *Server) getRecords(w http.ResponseWriter, r *http.Request) {
 	category := r.URL.Query().Get("category")
@@ -53,7 +81,7 @@ func (s *Server) getRecords(w http.ResponseWriter, r *http.Request) {
 }
 
 // Admin Only
-func (s *Server) createRecords(w http.ResponseWriter, r *http.Request) {
+func (s *Server) createRecord(w http.ResponseWriter, r *http.Request) {
 	b, err := io.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
@@ -76,17 +104,57 @@ func (s *Server) createRecords(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJSON(w, http.StatusCreated, map[string]any{
-		"record_id":      id,
+		"record_id": id,
+		"message":   "success",
+	})
+}
+
+// Admin Only
+func (s *Server) updateRecord(w http.ResponseWriter, r *http.Request) {
+	recordID, err := strconv.ParseInt(mux.Vars(r)["id"], 10, 64)
+	if err != nil {
+		utils.LogError("updateRecords", err)
+		utils.WriteError(w, http.StatusInternalServerError, "Internal Server Error")
+		return
+	}
+	b, err := io.ReadAll(r.Body)
+	defer r.Body.Close()
+	if err != nil {
+		utils.LogError("updateRecords", err)
+		utils.WriteError(w, http.StatusInternalServerError, "Internal Server Error")
+		return
+	}
+	var body database.Record
+	if err = json.Unmarshal(b, &body); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid Request Body")
+		return
+	}
+	if err = s.db.UpdateRecord(r.Context(), recordID, body); err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Internal Server Error")
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, map[string]string{
 		"message": "success",
 	})
 }
 
 // Admin Only
-func (s *Server) updateRecords(w http.ResponseWriter, r *http.Request) {
+func (s *Server) deleteRecord(w http.ResponseWriter, r *http.Request) {
+	recordID, err := strconv.ParseInt(mux.Vars(r)["id"], 10, 64)
+	if err != nil {
+		utils.LogError("deleteRecords", err)
+		utils.WriteError(w, http.StatusInternalServerError, "Internal Server Error")
+		return
+	}
 
-}
+	if err = s.db.DeleteRecord(r.Context(), recordID); err != nil {
+		utils.LogError("deleteRecords", err)
+		utils.WriteError(w, http.StatusInternalServerError, "Internal Server Error")
+		return
+	}
 
-// Admin Only
-func (s *Server) deleteRecords(w http.ResponseWriter, r *http.Request) {
-
+	utils.WriteJSON(w, http.StatusOK, map[string]string{
+		"message": "success",
+	})
 }
