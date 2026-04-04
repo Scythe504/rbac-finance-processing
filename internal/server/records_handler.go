@@ -40,11 +40,11 @@ func (s *Server) getRecord(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) getRecords(w http.ResponseWriter, r *http.Request) {
 	category := r.URL.Query().Get("category")
-	txn_type := r.URL.Query().Get("txn-type")
+	txnType := r.URL.Query().Get("txn_type")
 	from := r.URL.Query().Get("from")
 	to := r.URL.Query().Get("to")
-	includeDeleted := r.URL.Query().Get("deleted")
-	orderBy := r.URL.Query().Get("orderby")
+	showDeleted := r.URL.Query().Get("show_deleted")
+	ascending := r.URL.Query().Get("ascending")
 
 	safeFrom, err := utils.ParseTimeParam(from)
 	if err != nil {
@@ -59,12 +59,12 @@ func (s *Server) getRecords(w http.ResponseWriter, r *http.Request) {
 	}
 
 	filterParams := database.RecordFilters{
-		TxnType:     strings.ToLower(txn_type),
+		TxnType:     strings.ToLower(txnType),
 		Category:    strings.ToLower(category),
 		From:        safeFrom,
 		To:          safeTo,
-		ShowDeleted: includeDeleted == "true",
-		Ascending:   strings.ToLower(orderBy) == "asc",
+		ShowDeleted: showDeleted == "true",
+		Ascending:   strings.ToLower(ascending) == "true",
 	}
 
 	records, err := s.db.GetRecords(r.Context(), &filterParams)
