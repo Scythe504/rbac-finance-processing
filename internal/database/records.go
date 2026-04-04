@@ -105,7 +105,7 @@ func (s *service) GetRecords(ctx context.Context, filters *RecordFilters) ([]Rec
 	}
 	defer rows.Close()
 
-	var records []Record
+	var records []Record = make([]Record, 0)
 	for rows.Next() {
 		var r Record
 		err := rows.Scan(
