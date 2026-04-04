@@ -86,6 +86,27 @@ definitions:
     x-enum-varnames:
     - TxnTypeIncome
     - TxnTypeExpense
+  internal_server.CreateRecordRequest:
+    properties:
+      amount:
+        example: "100.50"
+        type: string
+      category:
+        example: Food
+        type: string
+      date:
+        example: "2023-10-27T10:00:00Z"
+        type: string
+      description:
+        example: Lunch at the mall
+        type: string
+      txn_type:
+        enum:
+        - income
+        - expense
+        example: expense
+        type: string
+    type: object
   internal_server.LoginUser:
     properties:
       email:
@@ -104,6 +125,27 @@ definitions:
       role:
         type: string
     type: object
+  internal_server.UpdateRecordRequest:
+    properties:
+      amount:
+        example: "150.00"
+        type: string
+      category:
+        example: Salary
+        type: string
+      date:
+        example: "2023-10-28T09:00:00Z"
+        type: string
+      description:
+        example: Monthly paycheck
+        type: string
+      txn_type:
+        enum:
+        - income
+        - expense
+        example: income
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -114,6 +156,7 @@ paths:
   /:
     get:
       description: Basic greeting to check if API is reachable
+      operationId: helloWorld
       produces:
       - application/json
       responses:
@@ -129,6 +172,7 @@ paths:
       consumes:
       - application/json
       description: Authenticate user and return JWT token
+      operationId: loginUser
       parameters:
       - description: Login credentials
         in: body
@@ -171,6 +215,7 @@ paths:
       consumes:
       - application/json
       description: Create a new account with a specific role
+      operationId: registerUser
       parameters:
       - description: User registration details
         in: body
@@ -213,6 +258,7 @@ paths:
       consumes:
       - application/json
       description: Get a summary of income, expenses, trends and recent activities
+      operationId: getDashboardSummary
       parameters:
       - description: Summary period (weekly, monthly, yearly, all)
         in: query
@@ -247,6 +293,7 @@ paths:
   /health:
     get:
       description: Check the health of the API and its database connection
+      operationId: healthCheck
       produces:
       - application/json
       responses:
@@ -262,6 +309,7 @@ paths:
       consumes:
       - application/json
       description: Get current logged in user information
+      operationId: getUserDetails
       produces:
       - application/json
       responses:
@@ -294,6 +342,7 @@ paths:
       - application/json
       description: Get a list of finance records with various filters (Analyst/Admin
         only)
+      operationId: getRecords
       parameters:
       - description: Filter by category
         in: query
@@ -356,13 +405,14 @@ paths:
       consumes:
       - application/json
       description: Create a new income or expense record (Admin only)
+      operationId: createRecord
       parameters:
       - description: Record details
         in: body
         name: body
         required: true
         schema:
-          $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.Record'
+          $ref: '#/definitions/internal_server.CreateRecordRequest'
       produces:
       - application/json
       responses:
@@ -393,6 +443,7 @@ paths:
       consumes:
       - application/json
       description: Delete a record by ID (Admin only)
+      operationId: deleteRecord
       parameters:
       - description: Record ID
         in: path
@@ -404,6 +455,12 @@ paths:
       responses:
         "200":
           description: Success
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid Record ID
           schema:
             additionalProperties:
               type: string
@@ -423,6 +480,7 @@ paths:
       consumes:
       - application/json
       description: Get details of a specific finance record by ID (Analyst/Admin only)
+      operationId: getRecord
       parameters:
       - description: Record ID
         in: path
@@ -437,6 +495,12 @@ paths:
           schema:
             additionalProperties:
               $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.Record'
+            type: object
+        "400":
+          description: Invalid Record ID
+          schema:
+            additionalProperties:
+              type: string
             type: object
         "404":
           description: Record not found
@@ -459,18 +523,14 @@ paths:
       consumes:
       - application/json
       description: Update details of an existing record (Admin only)
+      operationId: updateRecord
       parameters:
-      - description: Record ID
-        in: path
-        name: id
-        required: true
-        type: integer
       - description: Record updates
         in: body
         name: body
         required: true
         schema:
-          $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.Record'
+          $ref: '#/definitions/internal_server.UpdateRecordRequest'
       produces:
       - application/json
       responses:
@@ -481,7 +541,13 @@ paths:
               type: string
             type: object
         "400":
-          description: Invalid Request Body
+          description: Invalid Request Body / ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Record not found
           schema:
             additionalProperties:
               type: string
@@ -502,6 +568,7 @@ paths:
       consumes:
       - application/json
       description: Update the role of a specific user (Admin only)
+      operationId: setUserRole
       parameters:
       - description: User ID
         in: path
@@ -548,6 +615,7 @@ paths:
       consumes:
       - application/json
       description: Enable or disable a user account (Admin only)
+      operationId: toggleUserStatus
       parameters:
       - description: User ID
         in: path
@@ -574,6 +642,8 @@ paths:
       summary: Toggle user status
       tags:
       - Users
+schemes:
+- http
 securityDefinitions:
   BearerAuth:
     description: Type "Bearer <your-token>" to authenticate.

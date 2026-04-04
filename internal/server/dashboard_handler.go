@@ -19,6 +19,7 @@ import (
 // @Success 200 {object} map[string]database.DashboardSummary "Dashboard summary data"
 // @Failure 400 {object} map[string]string "Invalid Query Parameter"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @ID getDashboardSummary
 // @Router /dashboard [get]
 func (s *Server) getDashboardSummary(w http.ResponseWriter, r *http.Request) {
 	period := r.URL.Query().Get("period")

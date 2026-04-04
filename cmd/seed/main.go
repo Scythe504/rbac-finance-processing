@@ -114,7 +114,7 @@ func main() {
 
 	// 3. Seed Records
 	categories := []string{"Food", "Housing", "Transport", "Entertainment", "Utilities", "Salary", "Investment", "Shopping", "Health"}
-	incomeCategories := []string{"Salary", "Investment"}
+	incomeCategories := []string{"salary", "investment"}
 
 	now := time.Now()
 	startDate := now.AddDate(-2, 0, 0)
@@ -137,7 +137,7 @@ func main() {
 				txnDate = now
 			}
 
-			category := categories[rand.Intn(len(categories))]
+			category := strings.ToLower(categories[rand.Intn(len(categories))])
 			isIncome := slices.Contains(incomeCategories, category)
 
 			txnType := "expense"
@@ -149,7 +149,14 @@ func main() {
 
 			description := fmt.Sprintf("Sample %s for %s", txnType, category)
 
-			_, err = db.ExecContext(ctx, `INSERT INTO records (user_id, amount, txn_type, category, description, date) VALUES ($1, $2, $3, $4, $5, $6)`,
+			_, err = db.ExecContext(ctx, `
+				INSERT INTO records (user_id, amount, txn_type, category, description, date) 
+				SELECT $1, $2, $3, $4, $5, $6
+				WHERE NOT EXISTS (
+					SELECT 1 FROM records 
+					WHERE user_id = $1 AND amount = $2 AND txn_type = $3 
+					AND category = $4 AND date = $6
+				)`,
 				adminID, amount, txnType, category, description, txnDate)
 			if err != nil {
 				log.Fatalf("%sError inserting record: %v%s\n", ColorRed, err, ColorReset)

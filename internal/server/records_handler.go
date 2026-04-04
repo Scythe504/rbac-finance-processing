@@ -8,10 +8,12 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/scythe504/zorvyn-rbac-finance/internal/database"
 	"github.com/scythe504/zorvyn-rbac-finance/internal/utils"
+	"github.com/shopspring/decimal"
 )
 
 // getRecord retrieves a specific finance record
@@ -23,14 +25,16 @@ import (
 // @Security BearerAuth
 // @Param id path int true "Record ID"
 // @Success 200 {object} map[string]database.Record "Record details"
+// @Failure 400 {object} map[string]string "Invalid Record ID"
 // @Failure 404 {object} map[string]string "Record not found"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @ID getRecord
 // @Router /records/{id} [get]
 func (s *Server) getRecord(w http.ResponseWriter, r *http.Request) {
 	recordID, err := strconv.ParseInt(mux.Vars(r)["id"], 10, 64)
 	if err != nil {
 		utils.LogError("getRecord", err)
-		utils.WriteError(w, http.StatusInternalServerError, "Internal Server Error")
+		utils.WriteError(w, http.StatusBadRequest, "Invalid Record ID")
 		return
 	}
 
@@ -68,6 +72,7 @@ func (s *Server) getRecord(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} map[string]any "List of records and filters"
 // @Failure 400 {object} map[string]string "Invalid query parameters"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @ID getRecords
 // @Router /records [get]
 func (s *Server) getRecords(w http.ResponseWriter, r *http.Request) {
 	category := r.URL.Query().Get("category")
@@ -122,6 +127,22 @@ func (s *Server) getRecords(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+type CreateRecordRequest struct {
+	Amount      decimal.Decimal  `json:"amount" swaggertype:"string" example:"100.50"`
+	TxnType     database.TxnType `json:"txn_type" swaggertype:"string" enums:"income,expense" example:"expense"`
+	Category    string           `json:"category" example:"Food"`
+	Description *string          `json:"description" example:"Lunch at the mall"`
+	Date        time.Time        `json:"date" example:"2023-10-27T10:00:00Z"`
+}
+
+type UpdateRecordRequest struct {
+	Amount      decimal.Decimal  `json:"amount,omitempty" swaggertype:"string" example:"150.00"`
+	TxnType     database.TxnType `json:"txn_type,omitempty" swaggertype:"string" enums:"income,expense" example:"income"`
+	Category    string           `json:"category,omitempty" example:"Salary"`
+	Description *string          `json:"description,omitempty" example:"Monthly paycheck"`
+	Date        time.Time        `json:"date,omitempty" example:"2023-10-28T09:00:00Z"`
+}
+
 // createRecord creates a new finance record
 // @Summary Create a record
 // @Description Create a new income or expense record (Admin only)
@@ -129,10 +150,11 @@ func (s *Server) getRecords(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param body body database.Record true "Record details"
+// @Param body body CreateRecordRequest true "Record details"
 // @Success 201 {object} map[string]any "Record created"
 // @Failure 400 {object} map[string]string "Invalid Request Body"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @ID createRecord
 // @Router /records [post]
 func (s *Server) createRecord(w http.ResponseWriter, r *http.Request) {
 	b, err := io.ReadAll(r.Body)
@@ -142,14 +164,24 @@ func (s *Server) createRecord(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusInternalServerError, "Internal Server Error")
 		return
 	}
-	var body database.Record
+	var body CreateRecordRequest
 	if err = json.Unmarshal(b, &body); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, "Invalid Request Body")
 		return
 	}
 
 	userID := r.Context().Value(contextKeyUserID).(string)
-	id, err := s.db.CreateRecord(r.Context(), userID, body)
+
+	// Map request to database model
+	record := database.Record{
+		Amount:      body.Amount,
+		TxnType:     database.TxnType(strings.ToLower(string(body.TxnType))),
+		Category:    strings.ToLower(body.Category),
+		Description: body.Description,
+		Date:        body.Date,
+	}
+
+	id, err := s.db.CreateRecord(r.Context(), userID, record)
 
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, "Internal Server Error")
@@ -169,17 +201,18 @@ func (s *Server) createRecord(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param id path int true "Record ID"
-// @Param body body database.Record true "Record updates"
+// @Param body body UpdateRecordRequest true "Record updates"
 // @Success 200 {object} map[string]string "Success"
-// @Failure 400 {object} map[string]string "Invalid Request Body"
+// @Failure 400 {object} map[string]string "Invalid Request Body / ID"
+// @Failure 404 {object} map[string]string "Record not found"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @ID updateRecord
 // @Router /records/{id} [patch]
 func (s *Server) updateRecord(w http.ResponseWriter, r *http.Request) {
 	recordID, err := strconv.ParseInt(mux.Vars(r)["id"], 10, 64)
 	if err != nil {
 		utils.LogError("updateRecords", err)
-		utils.WriteError(w, http.StatusInternalServerError, "Internal Server Error")
+		utils.WriteError(w, http.StatusBadRequest, "Invalid Record ID")
 		return
 	}
 	b, err := io.ReadAll(r.Body)
@@ -189,12 +222,26 @@ func (s *Server) updateRecord(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusInternalServerError, "Internal Server Error")
 		return
 	}
-	var body database.Record
+	var body UpdateRecordRequest
 	if err = json.Unmarshal(b, &body); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, "Invalid Request Body")
 		return
 	}
-	if err = s.db.UpdateRecord(r.Context(), recordID, body); err != nil {
+
+	// Map request to database model for updates
+	updates := database.Record{
+		Amount:      body.Amount,
+		TxnType:     body.TxnType,
+		Category:    strings.ToLower(body.Category),
+		Description: body.Description,
+		Date:        body.Date,
+	}
+
+	if err = s.db.UpdateRecord(r.Context(), recordID, updates); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			utils.WriteError(w, http.StatusNotFound, "Not found")
+			return
+		}
 		utils.WriteError(w, http.StatusInternalServerError, "Internal Server Error")
 		return
 	}
@@ -214,12 +261,14 @@ func (s *Server) updateRecord(w http.ResponseWriter, r *http.Request) {
 // @Param id path int true "Record ID"
 // @Success 200 {object} map[string]string "Success"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Failure 400 {object} map[string]string "Invalid Record ID"
+// @ID deleteRecord
 // @Router /records/{id} [delete]
 func (s *Server) deleteRecord(w http.ResponseWriter, r *http.Request) {
 	recordID, err := strconv.ParseInt(mux.Vars(r)["id"], 10, 64)
 	if err != nil {
 		utils.LogError("deleteRecords", err)
-		utils.WriteError(w, http.StatusInternalServerError, "Internal Server Error")
+		utils.WriteError(w, http.StatusBadRequest, "Invalid Record ID")
 		return
 	}
 

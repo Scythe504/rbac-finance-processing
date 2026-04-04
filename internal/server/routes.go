@@ -14,12 +14,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	// Apply CORS middleware
 	r.Use(s.corsMiddleware)
-
-	r.HandleFunc("/", s.HelloWorldHandler)
-
-	r.HandleFunc("/health", s.healthHandler)
-
 	apiRoutesV1 := r.PathPrefix("/api/v1").Subrouter()
+	apiRoutesV1.HandleFunc("/health", s.healthHandler)
+	apiRoutesV1.HandleFunc("/", s.HelloWorldHandler)
 
 	authRoutes := apiRoutesV1.PathPrefix("/auth").Subrouter()
 	authRoutes.HandleFunc("/register", s.registerUser).Methods("POST")
@@ -73,6 +70,7 @@ func (s *Server) corsMiddleware(next http.Handler) http.Handler {
 // @Description Basic greeting to check if API is reachable
 // @Produce json
 // @Success 200 {object} map[string]string
+// @ID helloWorld
 // @Router / [get]
 func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
 	resp := make(map[string]string)
@@ -91,6 +89,7 @@ func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
 // @Description Check the health of the API and its database connection
 // @Produce json
 // @Success 200 {object} map[string]string "Health status statistics"
+// @ID healthCheck
 // @Router /health [get]
 func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
 	jsonResp, err := json.Marshal(s.db.Health())

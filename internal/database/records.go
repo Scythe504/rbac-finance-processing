@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -202,13 +203,28 @@ func (s *service) UpdateRecord(ctx context.Context, id int64, updates Record) er
 	query += fmt.Sprintf(" WHERE id = $%d AND deleted_at IS NULL", i)
 	args = append(args, id)
 
-	_, err := s.db.ExecContext(ctx, query, args...)
-	return err
+	res, err := s.db.ExecContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
 }
 
 func (s *service) DeleteRecord(ctx context.Context, id int64) error {
 	query := `UPDATE records SET deleted_at = now() 
-						WHERE id = $1`
+						WHERE id = $1
+						AND deleted_at IS NULL
+						`
 
 	// simply set deleted_at timestamp
 	_, err := s.db.ExecContext(ctx, query, id)

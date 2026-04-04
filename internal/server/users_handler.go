@@ -37,6 +37,7 @@ type LoginUser struct {
 // @Failure 400 {object} map[string]string "Invalid Request Body / Email / Role"
 // @Failure 409 {object} map[string]string "User with email already exists"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @ID registerUser
 // @Router /auth/register [post]
 func (s *Server) registerUser(w http.ResponseWriter, r *http.Request) {
 	b, err := io.ReadAll(r.Body)
@@ -110,6 +111,7 @@ func (s *Server) registerUser(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} map[string]string "Invalid Request Body"
 // @Failure 401 {object} map[string]string "Invalid Credentials"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @ID loginUser
 // @Router /auth/login [post]
 func (s *Server) loginUser(w http.ResponseWriter, r *http.Request) {
 	b, err := io.ReadAll(r.Body)
@@ -173,6 +175,7 @@ func (s *Server) loginUser(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} map[string]string "User details retrieved"
 // @Failure 404 {object} map[string]string "User not found"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @ID getUserDetails
 // @Router /me [get]
 func (s *Server) getUserDetails(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(contextKeyUserID).(string)
@@ -205,6 +208,7 @@ func (s *Server) getUserDetails(w http.ResponseWriter, r *http.Request) {
 // @Param id path string true "User ID"
 // @Success 200 {object} map[string]string "Success"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @ID toggleUserStatus
 // @Router /users/{id}/status [patch]
 func (s *Server) toggleUserStatus(w http.ResponseWriter, r *http.Request) {
 	targetUserId := mux.Vars(r)["id"]
@@ -232,6 +236,7 @@ func (s *Server) toggleUserStatus(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} map[string]string "Success"
 // @Failure 400 {object} map[string]string "Invalid Request Body / Role"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @ID setUserRole
 // @Router /users/{id}/role [patch]
 func (s *Server) setUserRole(w http.ResponseWriter, r *http.Request) {
 	targetUserId := mux.Vars(r)["id"]
