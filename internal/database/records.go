@@ -18,10 +18,11 @@ const (
 type Record struct {
 	ID          int64           `db:"id" json:"id"`
 	UserID      string          `db:"user_id" json:"user_id"`
-	Amount      decimal.Decimal `db:"amount" json:"amount"`
+	Amount      decimal.Decimal `db:"amount" json:"amount" swaggertype:"string"`
 	TxnType     TxnType         `db:"txn_type" json:"txn_type"`
 	Category    string          `db:"category" json:"category"`
 	Description *string         `db:"description" json:"description"`
+	Date        time.Time       `db:"date" json:"date"`
 	CreatedAt   time.Time       `db:"created_at" json:"created_at"`
 	UpdatedAt   *time.Time      `db:"updated_at" json:"updated_at,omitempty"`
 	DeletedAt   *time.Time      `db:"deleted_at" json:"deleted_at,omitempty"`
@@ -34,11 +35,13 @@ type RecordFilters struct {
 	To          time.Time `json:"to"`
 	ShowDeleted bool      `json:"show_deleted"`
 	Ascending   bool      `json:"ascending"`
+	Limit       int       `json:"limit"`
+	Offset      int       `json:"offset"`
 }
 
 func (s *service) GetRecord(ctx context.Context, recordID int64) (Record, error) {
 	query := `SELECT id, user_id, amount, 
-						 txn_type, category, description,
+						 txn_type, category, description, date,
 						 created_at, updated_at, deleted_at
 						FROM records
 						WHERE id=$1
@@ -47,7 +50,7 @@ func (s *service) GetRecord(ctx context.Context, recordID int64) (Record, error)
 	var r Record
 	if err := s.db.QueryRowContext(ctx, query, recordID).Scan(
 		&r.ID, &r.UserID, &r.Amount,
-		&r.TxnType, &r.Category, &r.Description,
+		&r.TxnType, &r.Category, &r.Description, &r.Date,
 		&r.CreatedAt, &r.UpdatedAt, &r.DeletedAt,
 	); err != nil {
 		return r, err
@@ -57,7 +60,7 @@ func (s *service) GetRecord(ctx context.Context, recordID int64) (Record, error)
 
 func (s *service) GetRecords(ctx context.Context, filters *RecordFilters) ([]Record, error) {
 	query := `SELECT id, user_id, amount, 
-						 txn_type, category, description,
+						 txn_type, category, description, date,
 						 created_at, updated_at, deleted_at
 						FROM records
 						WHERE 1=1 
@@ -79,13 +82,13 @@ func (s *service) GetRecords(ctx context.Context, filters *RecordFilters) ([]Rec
 	}
 
 	if !filters.From.IsZero() {
-		query += fmt.Sprintf(" AND created_at >= $%d", i)
+		query += fmt.Sprintf(" AND date >= $%d", i)
 		args = append(args, filters.From)
 		i++
 	}
 
 	if !filters.To.IsZero() {
-		query += fmt.Sprintf(" AND created_at <= $%d", i)
+		query += fmt.Sprintf(" AND date <= $%d", i)
 		args = append(args, filters.To)
 		i++
 	}
@@ -95,10 +98,23 @@ func (s *service) GetRecords(ctx context.Context, filters *RecordFilters) ([]Rec
 	}
 
 	if !filters.Ascending {
-		query += " ORDER BY created_at DESC"
+		query += " ORDER BY date DESC, created_at DESC"
 	} else {
-		query += " ORDER BY created_at ASC"
+		query += " ORDER BY date ASC, created_at ASC"
 	}
+
+	if filters.Limit > 0 {
+		query += fmt.Sprintf(" LIMIT $%d", i)
+		args = append(args, filters.Limit)
+		i++
+	}
+
+	if filters.Offset > 0 {
+		query += fmt.Sprintf(" OFFSET $%d", i)
+		args = append(args, filters.Offset)
+		i++
+	}
+
 	rows, err := s.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
@@ -110,7 +126,7 @@ func (s *service) GetRecords(ctx context.Context, filters *RecordFilters) ([]Rec
 		var r Record
 		err := rows.Scan(
 			&r.ID, &r.UserID, &r.Amount,
-			&r.TxnType, &r.Category, &r.Description,
+			&r.TxnType, &r.Category, &r.Description, &r.Date,
 			&r.CreatedAt, &r.UpdatedAt, &r.DeletedAt,
 		)
 
@@ -125,18 +141,21 @@ func (s *service) GetRecords(ctx context.Context, filters *RecordFilters) ([]Rec
 }
 
 func (s *service) CreateRecord(ctx context.Context, userID string, record Record) (int64, error) {
-	query := `INSERT INTO records (user_id, amount, txn_type, category, description)
-						VALUES ($1, $2, $3, $4, $5)`
+	var query string
+	var args []any
+	if !record.Date.IsZero() {
+		query = `INSERT INTO records (user_id, amount, txn_type, category, description, date)
+							VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`
+		args = []any{userID, record.Amount, record.TxnType, record.Category, record.Description, record.Date}
+	} else {
+		query = `INSERT INTO records (user_id, amount, txn_type, category, description)
+							VALUES ($1, $2, $3, $4, $5) RETURNING id`
+		args = []any{userID, record.Amount, record.TxnType, record.Category, record.Description}
+	}
 
 	var id int64
 
-	err := s.db.QueryRowContext(ctx, query,
-		record.UserID,
-		record.Amount,
-		record.TxnType,
-		record.Category,
-		record.Description,
-	).Scan(&id)
+	err := s.db.QueryRowContext(ctx, query, args...).Scan(&id)
 
 	if err != nil {
 		return -1, err
@@ -174,10 +193,16 @@ func (s *service) UpdateRecord(ctx context.Context, id int64, updates Record) er
 		i++
 	}
 
+	if !updates.Date.IsZero() {
+		query += fmt.Sprintf(", date = $%d", i)
+		args = append(args, updates.Date)
+		i++
+	}
+
 	query += fmt.Sprintf(" WHERE id = $%d AND deleted_at IS NULL", i)
 	args = append(args, id)
 
-	_, err := s.db.ExecContext(ctx, query, args)
+	_, err := s.db.ExecContext(ctx, query, args...)
 	return err
 }
 

@@ -8,6 +8,18 @@ import (
 	"github.com/scythe504/zorvyn-rbac-finance/internal/utils"
 )
 
+// getDashboardSummary retrieves the financial dashboard summary
+// @Summary Get dashboard summary
+// @Description Get a summary of income, expenses, trends and recent activities
+// @Tags Dashboard
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param period query string false "Summary period (weekly, monthly, yearly, all)"
+// @Success 200 {object} map[string]database.DashboardSummary "Dashboard summary data"
+// @Failure 400 {object} map[string]string "Invalid Query Parameter"
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Router /dashboard [get]
 func (s *Server) getDashboardSummary(w http.ResponseWriter, r *http.Request) {
 	period := r.URL.Query().Get("period")
 	safePeriod := database.PeriodType(strings.ToLower(period))

@@ -1,15 +1,72 @@
 services:
-  psql_bp:
-    image: postgres:latest
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${BLUEPRINT_DB_DATABASE}
-      POSTGRES_USER: ${BLUEPRINT_DB_USERNAME}
-      POSTGRES_PASSWORD: ${BLUEPRINT_DB_PASSWORD}
+  app:
+    build: .
     ports:
-      - "${BLUEPRINT_DB_PORT}:5432"
+      - "${PORT:-8080}:${PORT:-8080}"
+    volumes:
+      - .:/app
+    environment:
+      - PORT=${PORT:-8080}
+      - APP_ENV=${APP_ENV:-local}
+      - BLUEPRINT_DB_HOST=psql_bp
+      - BLUEPRINT_DB_PORT=${BLUEPRINT_DB_PORT:-5432}
+      - BLUEPRINT_DB_DATABASE=${BLUEPRINT_DB_DATABASE:-blueprint}
+      - BLUEPRINT_DB_USERNAME=${BLUEPRINT_DB_USERNAME:-melkey}
+      - BLUEPRINT_DB_PASSWORD=${BLUEPRINT_DB_PASSWORD:-password1234}
+      - BLUEPRINT_DB_SCHEMA=${BLUEPRINT_DB_SCHEMA:-public}
+      - JWT_SECRET=${JWT_SECRET:-7wzaOO3FrTEpTdRR4NgmnTjtSRQXunDV6riJxQMnY3Q=}
+    depends_on:
+      psql_bp:
+        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
+
+  psql_bp:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${BLUEPRINT_DB_USERNAME:-melkey} -d ${BLUEPRINT_DB_DATABASE:-blueprint}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    environment:
+      POSTGRES_DB: ${BLUEPRINT_DB_DATABASE:-blueprint}
+      POSTGRES_USER: ${BLUEPRINT_DB_USERNAME:-melkey}
+      POSTGRES_PASSWORD: ${BLUEPRINT_DB_PASSWORD:-password1234}
+    ports:
+      - "${BLUEPRINT_DB_PORT:-5432}:5432"
     volumes:
       - psql_volume_bp:/var/lib/postgresql/data
+
+  migrator:
+    build: .
+    environment:
+      - BLUEPRINT_DB_HOST=psql_bp
+      - BLUEPRINT_DB_PORT=5432
+      - BLUEPRINT_DB_DATABASE=${BLUEPRINT_DB_DATABASE:-blueprint}
+      - BLUEPRINT_DB_USERNAME=${BLUEPRINT_DB_USERNAME:-melkey}
+      - BLUEPRINT_DB_PASSWORD=${BLUEPRINT_DB_PASSWORD:-password1234}
+      - BLUEPRINT_DB_SCHEMA=${BLUEPRINT_DB_SCHEMA:-public}
+    command: >
+      sh -c "goose -dir migrations postgres \"postgres://${BLUEPRINT_DB_USERNAME:-melkey}:${BLUEPRINT_DB_PASSWORD:-password1234}@psql_bp:5432/${BLUEPRINT_DB_DATABASE:-blueprint}?sslmode=disable&search_path=${BLUEPRINT_DB_SCHEMA:-public}\" up"
+    depends_on:
+      psql_bp:
+        condition: service_healthy
+
+  seeder:
+    build: .
+    environment:
+      - BLUEPRINT_DB_HOST=psql_bp
+      - BLUEPRINT_DB_PORT=5432
+      - BLUEPRINT_DB_DATABASE=${BLUEPRINT_DB_DATABASE:-blueprint}
+      - BLUEPRINT_DB_USERNAME=${BLUEPRINT_DB_USERNAME:-melkey}
+      - BLUEPRINT_DB_PASSWORD=${BLUEPRINT_DB_PASSWORD:-password1234}
+      - BLUEPRINT_DB_SCHEMA=${BLUEPRINT_DB_SCHEMA:-public}
+      - JWT_SECRET=${JWT_SECRET:-7wzaOO3FrTEpTdRR4NgmnTjtSRQXunDV6riJxQMnY3Q=}
+    command: go run cmd/seed/main.go
+    depends_on:
+      migrator:
+        condition: service_completed_successfully
 
 volumes:
   psql_volume_bp:

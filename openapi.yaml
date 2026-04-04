@@ -1,0 +1,583 @@
+basePath: /api/v1
+definitions:
+  github_com_scythe504_zorvyn-rbac-finance_internal_database.CategoryTotals:
+    properties:
+      category:
+        type: string
+      expense:
+        type: string
+      income:
+        type: string
+    type: object
+  github_com_scythe504_zorvyn-rbac-finance_internal_database.DashboardSummary:
+    properties:
+      category_totals:
+        items:
+          $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.CategoryTotals'
+        type: array
+      grouped_by:
+        type: string
+      net_balance:
+        type: string
+      period:
+        $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.PeriodType'
+      recent_activities:
+        items:
+          $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.Record'
+        type: array
+      total_expense:
+        type: string
+      total_income:
+        type: string
+      trends_entry:
+        items:
+          $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.TrendsEntry'
+        type: array
+    type: object
+  github_com_scythe504_zorvyn-rbac-finance_internal_database.PeriodType:
+    enum:
+    - weekly
+    - monthly
+    - yearly
+    - all
+    type: string
+    x-enum-varnames:
+    - PeriodWeekly
+    - PeriodMonthly
+    - PeriodYearly
+    - PeriodAllTime
+  github_com_scythe504_zorvyn-rbac-finance_internal_database.Record:
+    properties:
+      amount:
+        type: string
+      category:
+        type: string
+      created_at:
+        type: string
+      date:
+        type: string
+      deleted_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      txn_type:
+        $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.TxnType'
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  github_com_scythe504_zorvyn-rbac-finance_internal_database.TrendsEntry:
+    properties:
+      date:
+        type: string
+      expense:
+        type: string
+      income:
+        type: string
+    type: object
+  github_com_scythe504_zorvyn-rbac-finance_internal_database.TxnType:
+    enum:
+    - income
+    - expense
+    type: string
+    x-enum-varnames:
+    - TxnTypeIncome
+    - TxnTypeExpense
+  internal_server.LoginUser:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  internal_server.RegisterUser:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API for managing personal finance with Role-Based Access Control.
+  title: Zorvyn RBAC Finance API
+  version: 1.0.0
+paths:
+  /:
+    get:
+      description: Basic greeting to check if API is reachable
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Hello World
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return JWT token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_server.LoginUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid Request Body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Invalid Credentials
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login a user
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new account with a specific role
+      parameters:
+      - description: User registration details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_server.RegisterUser'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User registered successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid Request Body / Email / Role
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: User with email already exists
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - Auth
+  /dashboard:
+    get:
+      consumes:
+      - application/json
+      description: Get a summary of income, expenses, trends and recent activities
+      parameters:
+      - description: Summary period (weekly, monthly, yearly, all)
+        in: query
+        name: period
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Dashboard summary data
+          schema:
+            additionalProperties:
+              $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.DashboardSummary'
+            type: object
+        "400":
+          description: Invalid Query Parameter
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get dashboard summary
+      tags:
+      - Dashboard
+  /health:
+    get:
+      description: Check the health of the API and its database connection
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Health status statistics
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: API Health
+  /me:
+    get:
+      consumes:
+      - application/json
+      description: Get current logged in user information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User details retrieved
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user details
+      tags:
+      - Users
+  /records:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of finance records with various filters (Analyst/Admin
+        only)
+      parameters:
+      - description: Filter by category
+        in: query
+        name: category
+        type: string
+      - description: Filter by transaction type (income/expense)
+        in: query
+        name: txn_type
+        type: string
+      - description: Filter by start date (YYYY-MM-DD)
+        in: query
+        name: from
+        type: string
+      - description: Filter by end date (YYYY-MM-DD)
+        in: query
+        name: to
+        type: string
+      - description: Include deleted records
+        in: query
+        name: show_deleted
+        type: boolean
+      - description: Sort ascending
+        in: query
+        name: ascending
+        type: boolean
+      - description: Limit number of results
+        in: query
+        name: limit
+        type: integer
+      - description: Page number for pagination
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of records and filters
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid query parameters
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List records
+      tags:
+      - Records
+    post:
+      consumes:
+      - application/json
+      description: Create a new income or expense record (Admin only)
+      parameters:
+      - description: Record details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.Record'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Record created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid Request Body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a record
+      tags:
+      - Records
+  /records/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a record by ID (Admin only)
+      parameters:
+      - description: Record ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a record
+      tags:
+      - Records
+    get:
+      consumes:
+      - application/json
+      description: Get details of a specific finance record by ID (Analyst/Admin only)
+      parameters:
+      - description: Record ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Record details
+          schema:
+            additionalProperties:
+              $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.Record'
+            type: object
+        "404":
+          description: Record not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get a record
+      tags:
+      - Records
+    patch:
+      consumes:
+      - application/json
+      description: Update details of an existing record (Admin only)
+      parameters:
+      - description: Record ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Record updates
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.Record'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid Request Body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a record
+      tags:
+      - Records
+  /users/{id}/role:
+    patch:
+      consumes:
+      - application/json
+      description: Update the role of a specific user (Admin only)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Target role details
+        in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            target_user_role:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid Request Body / Role
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Set user role
+      tags:
+      - Users
+  /users/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Enable or disable a user account (Admin only)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Toggle user status
+      tags:
+      - Users
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer <your-token>" to authenticate.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

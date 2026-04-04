@@ -68,6 +68,12 @@ func (s *Server) corsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+// HelloWorldHandler returns a greeting
+// @Summary Hello World
+// @Description Basic greeting to check if API is reachable
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Router / [get]
 func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
 	resp := make(map[string]string)
 	resp["message"] = "Hello World"
@@ -80,6 +86,12 @@ func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(jsonResp)
 }
 
+// healthHandler returns database health status
+// @Summary API Health
+// @Description Check the health of the API and its database connection
+// @Produce json
+// @Success 200 {object} map[string]string "Health status statistics"
+// @Router /health [get]
 func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
 	jsonResp, err := json.Marshal(s.db.Health())
 

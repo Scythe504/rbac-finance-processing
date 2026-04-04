@@ -39,22 +39,22 @@ type BalanceTotals struct {
 
 type CategoryTotals struct {
 	Category string          `json:"category"`
-	Income   decimal.Decimal `json:"income"`
-	Expense  decimal.Decimal `json:"expense"`
+	Income   decimal.Decimal `json:"income" swaggertype:"string"`
+	Expense  decimal.Decimal `json:"expense" swaggertype:"string"`
 }
 
 type TrendsEntry struct {
 	Date    time.Time       `json:"date"`
-	Income  decimal.Decimal `json:"income"`
-	Expense decimal.Decimal `json:"expense"`
+	Income  decimal.Decimal `json:"income" swaggertype:"string"`
+	Expense decimal.Decimal `json:"expense" swaggertype:"string"`
 }
 
 type DashboardSummary struct {
 	Period           PeriodType       `json:"period"`
 	GroupedBy        string           `json:"grouped_by"`
-	TotalIncome      decimal.Decimal  `json:"total_income"`
-	TotalExpense     decimal.Decimal  `json:"total_expense"`
-	NetBalance       decimal.Decimal  `json:"net_balance"`
+	TotalIncome      decimal.Decimal  `json:"total_income" swaggertype:"string"`
+	TotalExpense     decimal.Decimal  `json:"total_expense" swaggertype:"string"`
+	NetBalance       decimal.Decimal  `json:"net_balance" swaggertype:"string"`
 	CategoryTotals   []CategoryTotals `json:"category_totals"`
 	Trends           []TrendsEntry    `json:"trends_entry"`
 	RecentActivities []Record         `json:"recent_activities"`
@@ -68,12 +68,12 @@ func whereClauseBuilder(from, to time.Time) ([]string, []any) {
 
 	if !from.IsZero() {
 		args = append(args, from)
-		whereClauses = append(whereClauses, fmt.Sprintf("created_at >= $%d", len(args)))
+		whereClauses = append(whereClauses, fmt.Sprintf("date >= $%d", len(args)))
 	}
 
 	if !to.IsZero() {
 		args = append(args, to)
-		whereClauses = append(whereClauses, fmt.Sprintf("created_at <= $%d", len(args)))
+		whereClauses = append(whereClauses, fmt.Sprintf("date <= $%d", len(args)))
 	}
 
 	return whereClauses, args
@@ -140,24 +140,61 @@ func (s *service) fetchTrends(
 	period PeriodType,
 ) ([]TrendsEntry, error) {
 	config := PeriodConfigs[period]
-	whereClauses, args := whereClauseBuilder(from, to)
-	query := fmt.Sprintf(`SELECT 
-			DATE_TRUNC('%s', created_at) AS date,
-			COALESCE(SUM(amount) FILTER (WHERE txn_type = 'income'), 0) AS income,
-			COALESCE(SUM(amount) FILTER(WHERE txn_type = 'expense'), 0) AS expense
-		FROM records
-		WHERE %s
-		GROUP BY date
-		ORDER BY date ASC`, config.GroupBy, strings.Join(whereClauses, " AND "))
 
-	rows, err := s.db.QueryContext(ctx, query, args...)
+	// Handle PeriodAllTime or cases where from/to are not set
+	if from.IsZero() || to.IsZero() {
+		// Fallback to simple group by for all time to avoid massive generate_series
+		query := fmt.Sprintf(`SELECT 
+				DATE_TRUNC('%s', date) AS date,
+				COALESCE(SUM(amount) FILTER (WHERE txn_type = 'income'), 0) AS income,
+				COALESCE(SUM(amount) FILTER(WHERE txn_type = 'expense'), 0) AS expense
+			FROM records
+			WHERE deleted_at IS NULL
+			GROUP BY date
+			ORDER BY date ASC`, config.GroupBy)
+
+		rows, err := s.db.QueryContext(ctx, query)
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+
+		var trendEntries []TrendsEntry
+		for rows.Next() {
+			var trendEntry TrendsEntry
+			err = rows.Scan(&trendEntry.Date, &trendEntry.Income, &trendEntry.Expense)
+			if err != nil {
+				return nil, err
+			}
+			trendEntries = append(trendEntries, trendEntry)
+		}
+		return trendEntries, nil
+	}
+
+	interval := "1 " + config.GroupBy
+	if period == PeriodAllTime {
+		interval = "3 months"
+	}
+	query := fmt.Sprintf(`
+		SELECT 
+			series.date,
+			COALESCE(SUM(amount) FILTER (WHERE txn_type = 'income'), 0) AS income,
+			COALESCE(SUM(amount) FILTER (WHERE txn_type = 'expense'), 0) AS expense
+		FROM (
+			SELECT generate_series($1::timestamp, $2::timestamp, '%s'::interval) AS date
+		) series
+		LEFT JOIN records ON DATE_TRUNC('%s', records.date) = series.date 
+			AND records.deleted_at IS NULL
+		GROUP BY series.date
+		ORDER BY series.date ASC`, interval, config.GroupBy)
+
+	rows, err := s.db.QueryContext(ctx, query, from, to)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
 	var trendEntries []TrendsEntry
-
 	for rows.Next() {
 		var trendEntry TrendsEntry
 		err = rows.Scan(&trendEntry.Date, &trendEntry.Income, &trendEntry.Expense)
@@ -174,10 +211,10 @@ func (s *service) fetchTrends(
 }
 
 func (s *service) fetchRecentActivities(ctx context.Context) ([]Record, error) {
-	query := `SELECT id, amount, txn_type, category, created_at, description
+	query := `SELECT id, amount, txn_type, category, date, created_at, description
 		FROM records
 		WHERE deleted_at IS NULL
-		ORDER BY created_at DESC
+		ORDER BY date DESC, created_at DESC
 		LIMIT 10
 	`
 	rows, err := s.db.QueryContext(ctx, query)
@@ -187,16 +224,16 @@ func (s *service) fetchRecentActivities(ctx context.Context) ([]Record, error) {
 	defer rows.Close()
 	var recentActivities []Record
 	for rows.Next() {
-		var recentActivity Record
+		var r Record
 		err = rows.Scan(
-			&recentActivity.ID, &recentActivity.Amount, &recentActivity.TxnType,
-			&recentActivity.Category, &recentActivity.CreatedAt,
+			&r.ID, &r.Amount, &r.TxnType,
+			&r.Category, &r.Date, &r.CreatedAt, &r.Description,
 		)
 		if err != nil {
 			return nil, err
 		}
 
-		recentActivities = append(recentActivities, recentActivity)
+		recentActivities = append(recentActivities, r)
 	}
 
 	if err = rows.Err(); err != nil {

@@ -26,6 +26,18 @@ type LoginUser struct {
 	Password string `json:"password"`
 }
 
+// registerUser registers a new user
+// @Summary Register a new user
+// @Description Create a new account with a specific role
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param body body RegisterUser true "User registration details"
+// @Success 201 {object} map[string]string "User registered successfully"
+// @Failure 400 {object} map[string]string "Invalid Request Body / Email / Role"
+// @Failure 409 {object} map[string]string "User with email already exists"
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Router /auth/register [post]
 func (s *Server) registerUser(w http.ResponseWriter, r *http.Request) {
 	b, err := io.ReadAll(r.Body)
 	defer r.Body.Close()
@@ -87,6 +99,18 @@ func (s *Server) registerUser(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// loginUser authenticates a user
+// @Summary Login a user
+// @Description Authenticate user and return JWT token
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param body body LoginUser true "Login credentials"
+// @Success 200 {object} map[string]string "Login successful"
+// @Failure 400 {object} map[string]string "Invalid Request Body"
+// @Failure 401 {object} map[string]string "Invalid Credentials"
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Router /auth/login [post]
 func (s *Server) loginUser(w http.ResponseWriter, r *http.Request) {
 	b, err := io.ReadAll(r.Body)
 	defer r.Body.Close()
@@ -109,7 +133,7 @@ func (s *Server) loginUser(w http.ResponseWriter, r *http.Request) {
 	authUser, err := s.db.GetUserByEmail(r.Context(), body.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			utils.WriteError(w, http.StatusNotFound, "Invalid email or password")
+			utils.WriteError(w, http.StatusUnauthorized, "Invalid Credentials")
 			return
 		}
 		utils.LogError("loginUser", err)
@@ -119,7 +143,7 @@ func (s *Server) loginUser(w http.ResponseWriter, r *http.Request) {
 
 	if err = bcrypt.CompareHashAndPassword([]byte(authUser.Password), []byte(body.Password)); err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-			utils.WriteError(w, http.StatusBadRequest, "Password Incorrect")
+			utils.WriteError(w, http.StatusUnauthorized, "Invalid Credentials")
 			return
 		}
 		utils.LogError("loginUser", err)
@@ -139,6 +163,17 @@ func (s *Server) loginUser(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// getUserDetails returns current user information
+// @Summary Get user details
+// @Description Get current logged in user information
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} map[string]string "User details retrieved"
+// @Failure 404 {object} map[string]string "User not found"
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Router /me [get]
 func (s *Server) getUserDetails(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(contextKeyUserID).(string)
 	user, err := s.db.GetUserById(r.Context(), userID)
@@ -160,7 +195,17 @@ func (s *Server) getUserDetails(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// Admin Only
+// toggleUserStatus toggles user active status
+// @Summary Toggle user status
+// @Description Enable or disable a user account (Admin only)
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "User ID"
+// @Success 200 {object} map[string]string "Success"
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Router /users/{id}/status [patch]
 func (s *Server) toggleUserStatus(w http.ResponseWriter, r *http.Request) {
 	targetUserId := mux.Vars(r)["id"]
 
@@ -175,7 +220,19 @@ func (s *Server) toggleUserStatus(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// Admin Only
+// setUserRole updates user role
+// @Summary Set user role
+// @Description Update the role of a specific user (Admin only)
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "User ID"
+// @Param body body object{target_user_role=string} true "Target role details"
+// @Success 200 {object} map[string]string "Success"
+// @Failure 400 {object} map[string]string "Invalid Request Body / Role"
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Router /users/{id}/role [patch]
 func (s *Server) setUserRole(w http.ResponseWriter, r *http.Request) {
 	targetUserId := mux.Vars(r)["id"]
 	b, err := io.ReadAll(r.Body)

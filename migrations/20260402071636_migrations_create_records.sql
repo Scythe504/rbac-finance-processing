@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS records (
   txn_type txn_type_enum NOT NULL,
   category TEXT NOT NULL,
   description TEXT,
+  date DATE NOT NULL DEFAULT CURRENT_DATE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NULL,
   deleted_at TIMESTAMP WITH TIME ZONE DEFAULT NULL
