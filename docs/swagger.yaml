@@ -649,6 +649,7 @@ paths:
       tags:
       - Users
 schemes:
+- http
 - https
 securityDefinitions:
   BearerAuth:
