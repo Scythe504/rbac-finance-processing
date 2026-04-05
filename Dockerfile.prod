@@ -20,13 +20,3 @@ COPY --from=builder /out/api /api
 
 EXPOSE 8080
 CMD ["/api"]
-
-# --- Stage 3: Migration Runtime ---
-FROM alpine:latest AS migrate
-
-WORKDIR /app
-
-COPY --from=builder /go/bin/goose /usr/local/bin/goose
-COPY ./migrations ./migrations
-
-CMD ["sh", "-c", "goose -dir ./migrations postgres \"$DATABASE_URL\" up"]
