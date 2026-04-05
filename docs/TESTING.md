@@ -9,7 +9,7 @@ Before testing, ensure the application is running. Follow the setup instructions
 1. Open Postman
 2. Navigate to **Workspaces → Collections**
 3. Click **Import**
-4. Drag and drop `docs/openapi.yaml` from the project root into the import dialog, or click **Choose Files** and select it manually
+4. Drag and drop `docs/swagger.yaml` from the project root into the import dialog, or click **Choose Files** and select it manually
 5. Postman will generate a collection with all endpoints pre-configured
 
 ## Setting Up Authentication
