@@ -27,7 +27,7 @@ type Service interface {
 	GetDashboardSummary(ctx context.Context, period PeriodType) (DashboardSummary, error)
 
 	// Record methods
-	GetRecord(ctx context.Context, recordID int64) (Record, error) 
+	GetRecord(ctx context.Context, recordID int64) (Record, error)
 	GetRecords(ctx context.Context, filters *RecordFilters) ([]Record, error)
 	CreateRecord(ctx context.Context, userID string, record Record) (int64, error)
 	UpdateRecord(ctx context.Context, id int64, updates Record) error
@@ -53,6 +53,7 @@ var (
 	host       = os.Getenv("BLUEPRINT_DB_HOST")
 	schema     = os.Getenv("BLUEPRINT_DB_SCHEMA")
 	dbInstance *service
+	dbUrl      = os.Getenv("DATABASE_URL")
 )
 
 func New() Service {
@@ -60,7 +61,15 @@ func New() Service {
 	if dbInstance != nil {
 		return dbInstance
 	}
-	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s", username, password, host, port, database, schema)
+
+	var connStr string
+
+	if dbUrl != "" {
+		connStr = dbUrl
+	} else {
+		connStr = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=require&search_path=%s", username, password, host, port, database, schema)
+	}
+
 	db, err := sql.Open("pgx", connStr)
 	if err != nil {
 		log.Fatal(err)
