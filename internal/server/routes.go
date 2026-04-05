@@ -6,7 +6,9 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	_ "github.com/scythe504/zorvyn-rbac-finance/docs"
 	"github.com/scythe504/zorvyn-rbac-finance/internal/database"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
@@ -14,6 +16,10 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	// Apply CORS middleware
 	r.Use(s.corsMiddleware)
+
+	r.PathPrefix("/swagger").Handler(httpSwagger.Handler(
+		httpSwagger.URL("swagger/doc.json"),
+	))
 	apiRoutesV1 := r.PathPrefix("/api/v1").Subrouter()
 	apiRoutesV1.HandleFunc("/health", s.healthHandler)
 	apiRoutesV1.HandleFunc("/", s.HelloWorldHandler)
@@ -27,7 +33,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	protectedRoutes.Use(s.authMiddleWare)
 	protectedRoutes.HandleFunc("/me", s.getUserDetails).Methods("GET")
 	protectedRoutes.HandleFunc("/dashboard", s.getDashboardSummary).Methods("GET")
-	
+
 	// Admin, Analyst
 	analystRoutes := protectedRoutes.NewRoute().Subrouter()
 	analystRoutes.Use(s.requireRole(database.RoleAnalyst, database.RoleAdmin))

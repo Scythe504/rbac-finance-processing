@@ -146,7 +146,6 @@ definitions:
         example: income
         type: string
     type: object
-host: localhost:8080
 info:
   contact: {}
   description: API for managing personal finance with Role-Based Access Control.
@@ -233,13 +232,20 @@ paths:
               type: string
             type: object
         "400":
-          description: Invalid Request Body / Email / Role
+          description: Invalid Request Body / Email Address
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Self registration is only available for viewer role. Contact
+            an admin for desired role.
           schema:
             additionalProperties:
               type: string
             type: object
         "409":
-          description: User with email already exists
+          description: User with email already exists, Please Login
           schema:
             additionalProperties:
               type: string

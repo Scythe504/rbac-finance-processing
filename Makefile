@@ -66,11 +66,6 @@ watch:
 
 # Generate Swagger documentation
 swag:
-	@echo "Generating Swagger documentation..."
-	@go install github.com/swaggo/swag/cmd/swag@latest
-	@$$(go env GOPATH)/bin/swag init -g cmd/api/main.go --parseInternal --parseDependency --output docs/ --outputTypes yaml
-	@rm -f docs/docs.go
-	@cp docs/swagger.yaml docs/openapi.yaml
-	@rm -f docs/swagger.yaml
+	@$$(go env GOPATH)/bin/swag init -g cmd/api/main.go --parseInternal --parseDependency --output docs/
 
 .PHONY: all build run test clean watch docker-run docker-down itest swag

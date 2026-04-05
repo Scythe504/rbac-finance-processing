@@ -1,7 +1,6 @@
 // @title Zorvyn RBAC Finance API
 // @version 1.0.0
 // @description API for managing personal finance with Role-Based Access Control.
-// @host localhost:8080
 // @BasePath /api/v1
 // @schemes http
 // @securityDefinitions.apikey BearerAuth
