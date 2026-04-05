@@ -1006,7 +1006,7 @@ var SwaggerInfo = &swag.Spec{
 	Version:          "1.0.0",
 	Host:             "",
 	BasePath:         "/api/v1",
-	Schemes:          []string{"http"},
+	Schemes:          []string{"https"},
 	Title:            "Zorvyn RBAC Finance API",
 	Description:      "API for managing personal finance with Role-Based Access Control.",
 	InfoInstanceName: "swagger",

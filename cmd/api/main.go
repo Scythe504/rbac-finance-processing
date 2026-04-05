@@ -2,7 +2,7 @@
 // @version 1.0.0
 // @description API for managing personal finance with Role-Based Access Control.
 // @BasePath /api/v1
-// @schemes http
+// @schemes https
 // @securityDefinitions.apikey BearerAuth
 // @in header
 // @name Authorization

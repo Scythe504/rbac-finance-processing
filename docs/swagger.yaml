@@ -649,7 +649,7 @@ paths:
       tags:
       - Users
 schemes:
-- http
+- https
 securityDefinitions:
   BearerAuth:
     description: Type "Bearer <your-token>" to authenticate.

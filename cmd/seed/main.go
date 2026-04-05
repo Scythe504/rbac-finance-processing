@@ -31,14 +31,15 @@ const (
 func main() {
 	fmt.Printf("%sStarting database seeding...%s\n", ColorCyan, ColorReset)
 
-	dbHost := os.Getenv("BLUEPRINT_DB_HOST")
-	dbPort := os.Getenv("BLUEPRINT_DB_PORT")
-	dbUser := os.Getenv("BLUEPRINT_DB_USERNAME")
-	dbPass := os.Getenv("BLUEPRINT_DB_PASSWORD")
-	dbName := os.Getenv("BLUEPRINT_DB_DATABASE")
-	dbSchema := os.Getenv("BLUEPRINT_DB_SCHEMA")
+	// dbHost := os.Getenv("BLUEPRINT_DB_HOST")
+	// dbPort := os.Getenv("BLUEPRINT_DB_PORT")
+	// dbUser := os.Getenv("BLUEPRINT_DB_USERNAME")
+	// dbPass := os.Getenv("BLUEPRINT_DB_PASSWORD")
+	// dbName := os.Getenv("BLUEPRINT_DB_DATABASE")
+	// dbSchema := os.Getenv("BLUEPRINT_DB_SCHEMA")
 
-	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s", dbUser, dbPass, dbHost, dbPort, dbName, dbSchema)
+	// connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s", dbUser, dbPass, dbHost, dbPort, dbName, dbSchema)
+	connStr := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("pgx", connStr)
 	if err != nil {
 		log.Fatalf("%sError opening database: %v%s\n", ColorRed, err, ColorReset)
