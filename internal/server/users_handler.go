@@ -67,8 +67,14 @@ func (s *Server) registerUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !utils.IsValidRole(body.Role) {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid Request Body")
+		return
+	}
+
 	if body.Role != string(database.RoleViewer) {
 		utils.WriteError(w, http.StatusForbidden, "Self registration is only available for viewer role. Contact an admin for desired role.")
+		return
 	}
 
 	user := database.User{

@@ -74,7 +74,7 @@ func (s *service) ToggleUserStatus(ctx context.Context, userID string) error {
 }
 
 func (s *service) AssignUserRole(ctx context.Context, userID string, role RoleType) error {
-	query := `UPDATE users SET roleType = $1 WHERE id = $2`
+	query := `UPDATE users SET role = $1 WHERE id = $2`
 	_, err := s.db.ExecContext(ctx, query, role, userID)
 
 	return err
