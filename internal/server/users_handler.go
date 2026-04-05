@@ -34,8 +34,9 @@ type LoginUser struct {
 // @Produce json
 // @Param body body RegisterUser true "User registration details"
 // @Success 201 {object} map[string]string "User registered successfully"
-// @Failure 400 {object} map[string]string "Invalid Request Body / Email / Role"
-// @Failure 409 {object} map[string]string "User with email already exists"
+// @Failure 400 {object} map[string]string "Invalid Request Body / Email Address"
+// @Failure 401 {object} map[string]string "Self registration is only available for viewer role. Contact an admin for desired role."
+// @Failure 409 {object} map[string]string "User with email already exists, Please Login"
 // @Failure 500 {object} map[string]string "Internal Server Error"
 // @ID registerUser
 // @Router /auth/register [post]
@@ -66,9 +67,8 @@ func (s *Server) registerUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !utils.IsValidRole(body.Role) {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid User Role")
-		return
+	if body.Role != string(database.RoleViewer) {
+		utils.WriteError(w, http.StatusForbidden, "Self registration is only available for viewer role. Contact an admin for desired role.")
 	}
 
 	user := database.User{

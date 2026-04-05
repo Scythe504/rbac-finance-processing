@@ -12,6 +12,9 @@ build:
 # Run the application
 run:
 	@go run cmd/api/main.go
+
+seed:
+	@go run cmd/seed/main.go
 # Create DB container
 docker-run:
 	@if docker compose up --build 2>/dev/null; then \
@@ -65,8 +68,9 @@ watch:
 swag:
 	@echo "Generating Swagger documentation..."
 	@go install github.com/swaggo/swag/cmd/swag@latest
-	@$$(go env GOPATH)/bin/swag init -g cmd/api/main.go --parseInternal --parseDependency --output ./ --outputTypes yaml
-	@mv swagger.yaml openapi.yaml
-	@rm -f docs.go # Cleaning up unwanted files if generated
+	@$$(go env GOPATH)/bin/swag init -g cmd/api/main.go --parseInternal --parseDependency --output docs/ --outputTypes yaml
+	@rm -f docs/docs.go
+	@cp docs/swagger.yaml docs/openapi.yaml
+	@rm -f docs/swagger.yaml
 
 .PHONY: all build run test clean watch docker-run docker-down itest swag
