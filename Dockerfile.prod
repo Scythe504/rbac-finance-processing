@@ -9,7 +9,6 @@ RUN go mod download
 COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /out/api ./cmd/api
-RUN go install github.com/pressly/goose/v3/cmd/goose@latest
 
 # --- Stage 2: API Runtime ---
 FROM alpine:latest AS api
