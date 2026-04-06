@@ -24,10 +24,10 @@ import (
 // @Produce json
 // @Security BearerAuth
 // @Param id path int true "Record ID"
-// @Success 200 {object} map[string]database.Record "Record details"
-// @Failure 400 {object} map[string]string "Invalid Record ID"
-// @Failure 404 {object} map[string]string "Record not found"
-// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Success 200 {object} RecordResponse "Record details"
+// @Failure 400 {object} utils.ErrorResponse "Invalid Record ID"
+// @Failure 404 {object} utils.ErrorResponse "Record not found"
+// @Failure 500 {object} utils.ErrorResponse "Internal Server Error"
 // @ID getRecord
 // @Router /records/{id} [get]
 func (s *Server) getRecord(w http.ResponseWriter, r *http.Request) {
@@ -49,8 +49,8 @@ func (s *Server) getRecord(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, map[string]any{
-		"data": record,
+	utils.WriteJSON(w, http.StatusOK, RecordResponse{
+		Data: record,
 	})
 }
 
@@ -69,9 +69,9 @@ func (s *Server) getRecord(w http.ResponseWriter, r *http.Request) {
 // @Param ascending query bool false "Sort ascending"
 // @Param limit query int false "Limit number of results"
 // @Param page query int false "Page number for pagination"
-// @Success 200 {object} map[string]any "List of records and filters"
-// @Failure 400 {object} map[string]string "Invalid query parameters"
-// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Success 200 {object} RecordsListResponse "List of records and filters"
+// @Failure 400 {object} utils.ErrorResponse "Invalid query parameters"
+// @Failure 500 {object} utils.ErrorResponse "Internal Server Error"
 // @ID getRecords
 // @Router /records [get]
 func (s *Server) getRecords(w http.ResponseWriter, r *http.Request) {
@@ -121,9 +121,9 @@ func (s *Server) getRecords(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, map[string]any{
-		"data":    records,
-		"filters": filterParams,
+	utils.WriteJSON(w, http.StatusOK, RecordsListResponse{
+		Data:    records,
+		Filters: filterParams,
 	})
 }
 
@@ -151,9 +151,9 @@ type UpdateRecordRequest struct {
 // @Produce json
 // @Security BearerAuth
 // @Param body body CreateRecordRequest true "Record details"
-// @Success 201 {object} map[string]any "Record created"
-// @Failure 400 {object} map[string]string "Invalid Request Body"
-// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Success 201 {object} RecordCreatedResponse "Record created"
+// @Failure 400 {object} utils.ErrorResponse "Invalid Request Body"
+// @Failure 500 {object} utils.ErrorResponse "Internal Server Error"
 // @ID createRecord
 // @Router /records [post]
 func (s *Server) createRecord(w http.ResponseWriter, r *http.Request) {
@@ -188,9 +188,9 @@ func (s *Server) createRecord(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusCreated, map[string]any{
-		"record_id": id,
-		"message":   "success",
+	utils.WriteJSON(w, http.StatusCreated, RecordCreatedResponse{
+		RecordID: id,
+		Message:  "success",
 	})
 }
 
@@ -202,10 +202,10 @@ func (s *Server) createRecord(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Security BearerAuth
 // @Param body body UpdateRecordRequest true "Record updates"
-// @Success 200 {object} map[string]string "Success"
-// @Failure 400 {object} map[string]string "Invalid Request Body / ID"
-// @Failure 404 {object} map[string]string "Record not found"
-// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Success 200 {object} utils.MessageResponse "Success"
+// @Failure 400 {object} utils.ErrorResponse "Invalid Request Body / ID"
+// @Failure 404 {object} utils.ErrorResponse "Record not found"
+// @Failure 500 {object} utils.ErrorResponse "Internal Server Error"
 // @ID updateRecord
 // @Router /records/{id} [patch]
 func (s *Server) updateRecord(w http.ResponseWriter, r *http.Request) {
@@ -246,8 +246,8 @@ func (s *Server) updateRecord(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, map[string]string{
-		"message": "success",
+	utils.WriteJSON(w, http.StatusOK, utils.MessageResponse{
+		Message: "success",
 	})
 }
 
@@ -259,9 +259,9 @@ func (s *Server) updateRecord(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Security BearerAuth
 // @Param id path int true "Record ID"
-// @Success 200 {object} map[string]string "Success"
-// @Failure 500 {object} map[string]string "Internal Server Error"
-// @Failure 400 {object} map[string]string "Invalid Record ID"
+// @Success 200 {object} utils.MessageResponse "Success"
+// @Failure 500 {object} utils.ErrorResponse "Internal Server Error"
+// @Failure 400 {object} utils.ErrorResponse "Invalid Record ID"
 // @ID deleteRecord
 // @Router /records/{id} [delete]
 func (s *Server) deleteRecord(w http.ResponseWriter, r *http.Request) {
@@ -278,7 +278,7 @@ func (s *Server) deleteRecord(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, map[string]string{
-		"message": "success",
+	utils.WriteJSON(w, http.StatusOK, utils.MessageResponse{
+		Message: "success",
 	})
 }

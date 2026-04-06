@@ -16,9 +16,9 @@ import (
 // @Produce json
 // @Security BearerAuth
 // @Param period query string false "Summary period (weekly, monthly, yearly, all)"
-// @Success 200 {object} map[string]database.DashboardSummary "Dashboard summary data"
-// @Failure 400 {object} map[string]string "Invalid Query Parameter"
-// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Success 200 {object} DashboardResponse "Dashboard summary data"
+// @Failure 400 {object} utils.ErrorResponse "Invalid Query Parameter"
+// @Failure 500 {object} utils.ErrorResponse "Internal Server Error"
 // @ID getDashboardSummary
 // @Router /dashboard [get]
 func (s *Server) getDashboardSummary(w http.ResponseWriter, r *http.Request) {
@@ -39,7 +39,7 @@ func (s *Server) getDashboardSummary(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, map[string]any{
-		"data": dashbSummary,
+	utils.WriteJSON(w, http.StatusOK, DashboardResponse{
+		Data: dashbSummary,
 	})
 }

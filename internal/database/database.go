@@ -15,9 +15,8 @@ import (
 
 // Service represents a service that interacts with a database.
 type Service interface {
-	// Health returns a map of health status information.
-	// The keys and values in the map are service-specific.
-	Health() map[string]string
+	// Health returns health status information.
+	Health() HealthStats
 
 	// Close terminates the database connection.
 	// It returns an error if the connection cannot be closed.
@@ -45,6 +44,19 @@ type service struct {
 	db *sql.DB
 }
 
+type HealthStats struct {
+	Status            string `json:"status"`
+	Message           string `json:"message"`
+	OpenConnections   string `json:"open_connections,omitempty"`
+	InUse             string `json:"in_use,omitempty"`
+	Idle              string `json:"idle,omitempty"`
+	WaitCount         string `json:"wait_count,omitempty"`
+	WaitDuration      string `json:"wait_duration,omitempty"`
+	MaxIdleClosed     string `json:"max_idle_closed,omitempty"`
+	MaxLifetimeClosed string `json:"max_lifetime_closed,omitempty"`
+	Error             string `json:"error,omitempty"`
+}
+
 var (
 	database   = os.Getenv("BLUEPRINT_DB_DATABASE")
 	password   = os.Getenv("BLUEPRINT_DB_PASSWORD")
@@ -67,7 +79,7 @@ func New() Service {
 	if dbUrl != "" {
 		connStr = dbUrl
 	} else {
-		connStr = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=require&search_path=%s", username, password, host, port, database, schema)
+		connStr = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s", username, password, host, port, database, schema)
 	}
 
 	db, err := sql.Open("pgx", connStr)
@@ -81,51 +93,50 @@ func New() Service {
 }
 
 // Health checks the health of the database connection by pinging the database.
-// It returns a map with keys indicating various health statistics.
-func (s *service) Health() map[string]string {
+func (s *service) Health() HealthStats {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
-	stats := make(map[string]string)
+	stats := HealthStats{}
 
 	// Ping the database
 	err := s.db.PingContext(ctx)
 	if err != nil {
-		stats["status"] = "down"
-		stats["error"] = fmt.Sprintf("db down: %v", err)
+		stats.Status = "down"
+		stats.Error = fmt.Sprintf("db down: %v", err)
 		log.Fatalf("db down: %v", err) // Log the error and terminate the program
 		return stats
 	}
 
 	// Database is up, add more statistics
-	stats["status"] = "up"
-	stats["message"] = "It's healthy"
+	stats.Status = "up"
+	stats.Message = "It's healthy"
 
 	// Get database stats (like open connections, in use, idle, etc.)
 	dbStats := s.db.Stats()
-	stats["open_connections"] = strconv.Itoa(dbStats.OpenConnections)
-	stats["in_use"] = strconv.Itoa(dbStats.InUse)
-	stats["idle"] = strconv.Itoa(dbStats.Idle)
-	stats["wait_count"] = strconv.FormatInt(dbStats.WaitCount, 10)
-	stats["wait_duration"] = dbStats.WaitDuration.String()
-	stats["max_idle_closed"] = strconv.FormatInt(dbStats.MaxIdleClosed, 10)
-	stats["max_lifetime_closed"] = strconv.FormatInt(dbStats.MaxLifetimeClosed, 10)
+	stats.OpenConnections = strconv.Itoa(dbStats.OpenConnections)
+	stats.InUse = strconv.Itoa(dbStats.InUse)
+	stats.Idle = strconv.Itoa(dbStats.Idle)
+	stats.WaitCount = strconv.FormatInt(dbStats.WaitCount, 10)
+	stats.WaitDuration = dbStats.WaitDuration.String()
+	stats.MaxIdleClosed = strconv.FormatInt(dbStats.MaxIdleClosed, 10)
+	stats.MaxLifetimeClosed = strconv.FormatInt(dbStats.MaxLifetimeClosed, 10)
 
 	// Evaluate stats to provide a health message
 	if dbStats.OpenConnections > 40 { // Assuming 50 is the max for this example
-		stats["message"] = "The database is experiencing heavy load."
+		stats.Message = "The database is experiencing heavy load."
 	}
 
 	if dbStats.WaitCount > 1000 {
-		stats["message"] = "The database has a high number of wait events, indicating potential bottlenecks."
+		stats.Message = "The database has a high number of wait events, indicating potential bottlenecks."
 	}
 
 	if dbStats.MaxIdleClosed > int64(dbStats.OpenConnections)/2 {
-		stats["message"] = "Many idle connections are being closed, consider revising the connection pool settings."
+		stats.Message = "Many idle connections are being closed, consider revising the connection pool settings."
 	}
 
 	if dbStats.MaxLifetimeClosed > int64(dbStats.OpenConnections)/2 {
-		stats["message"] = "Many connections are being closed due to max lifetime, consider increasing max lifetime or revising the connection usage pattern."
+		stats.Message = "Many connections are being closed due to max lifetime, consider increasing max lifetime or revising the connection usage pattern."
 	}
 
 	return stats

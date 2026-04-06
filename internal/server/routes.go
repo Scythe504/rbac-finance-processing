@@ -1,13 +1,12 @@
 package server
 
 import (
-	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	_ "github.com/scythe504/zorvyn-rbac-finance/docs"
 	"github.com/scythe504/zorvyn-rbac-finance/internal/database"
+	"github.com/scythe504/zorvyn-rbac-finance/internal/utils"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
@@ -75,34 +74,22 @@ func (s *Server) corsMiddleware(next http.Handler) http.Handler {
 // @Summary Hello World
 // @Description Basic greeting to check if API is reachable
 // @Produce json
-// @Success 200 {object} map[string]string
+// @Success 200 {object} utils.MessageResponse
 // @ID helloWorld
 // @Router / [get]
 func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
-	resp := make(map[string]string)
-	resp["message"] = "Hello World"
-
-	jsonResp, err := json.Marshal(resp)
-	if err != nil {
-		log.Fatalf("error handling JSON marshal. Err: %v", err)
-	}
-
-	_, _ = w.Write(jsonResp)
+	utils.WriteJSON(w, http.StatusOK, utils.MessageResponse{
+		Message: "Hello World",
+	})
 }
 
 // healthHandler returns database health status
 // @Summary API Health
 // @Description Check the health of the API and its database connection
 // @Produce json
-// @Success 200 {object} map[string]string "Health status statistics"
+// @Success 200 {object} database.HealthStats "Health status statistics"
 // @ID healthCheck
 // @Router /health [get]
 func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
-	jsonResp, err := json.Marshal(s.db.Health())
-
-	if err != nil {
-		log.Fatalf("error handling JSON marshal. Err: %v", err)
-	}
-
-	_, _ = w.Write(jsonResp)
+	utils.WriteJSON(w, http.StatusOK, s.db.Health())
 }

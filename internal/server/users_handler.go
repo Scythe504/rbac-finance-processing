@@ -33,11 +33,11 @@ type LoginUser struct {
 // @Accept json
 // @Produce json
 // @Param body body RegisterUser true "User registration details"
-// @Success 201 {object} map[string]string "User registered successfully"
-// @Failure 400 {object} map[string]string "Invalid Request Body / Email Address"
-// @Failure 401 {object} map[string]string "Self registration is only available for viewer role. Contact an admin for desired role."
-// @Failure 409 {object} map[string]string "User with email already exists, Please Login"
-// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Success 201 {object} AuthResponse "User registered successfully"
+// @Failure 400 {object} utils.ErrorResponse "Invalid Request Body / Email Address"
+// @Failure 401 {object} utils.ErrorResponse "Self registration is only available for viewer role. Contact an admin for desired role."
+// @Failure 409 {object} utils.ErrorResponse "User with email already exists, Please Login"
+// @Failure 500 {object} utils.ErrorResponse "Internal Server Error"
 // @ID registerUser
 // @Router /auth/register [post]
 func (s *Server) registerUser(w http.ResponseWriter, r *http.Request) {
@@ -100,9 +100,9 @@ func (s *Server) registerUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusCreated, map[string]string{
-		"user_id": userId,
-		"token":   token,
+	utils.WriteJSON(w, http.StatusCreated, AuthResponse{
+		UserID: userId,
+		Token:  token,
 	})
 }
 
@@ -113,10 +113,10 @@ func (s *Server) registerUser(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Param body body LoginUser true "Login credentials"
-// @Success 200 {object} map[string]string "Login successful"
-// @Failure 400 {object} map[string]string "Invalid Request Body"
-// @Failure 401 {object} map[string]string "Invalid Credentials"
-// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Success 200 {object} AuthResponse "Login successful"
+// @Failure 400 {object} utils.ErrorResponse "Invalid Request Body"
+// @Failure 401 {object} utils.ErrorResponse "Invalid Credentials"
+// @Failure 500 {object} utils.ErrorResponse "Internal Server Error"
 // @ID loginUser
 // @Router /auth/login [post]
 func (s *Server) loginUser(w http.ResponseWriter, r *http.Request) {
@@ -165,9 +165,9 @@ func (s *Server) loginUser(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusInternalServerError, "Internal Server Error")
 	}
 
-	utils.WriteJSON(w, http.StatusOK, map[string]string{
-		"user_id": authUser.ID,
-		"token":   token,
+	utils.WriteJSON(w, http.StatusOK, AuthResponse{
+		UserID: authUser.ID,
+		Token:  token,
 	})
 }
 
@@ -178,9 +178,9 @@ func (s *Server) loginUser(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Success 200 {object} map[string]string "User details retrieved"
-// @Failure 404 {object} map[string]string "User not found"
-// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Success 200 {object} UserDetailsResponse "User details retrieved"
+// @Failure 404 {object} utils.ErrorResponse "User not found"
+// @Failure 500 {object} utils.ErrorResponse "Internal Server Error"
 // @ID getUserDetails
 // @Router /me [get]
 func (s *Server) getUserDetails(w http.ResponseWriter, r *http.Request) {
@@ -196,11 +196,11 @@ func (s *Server) getUserDetails(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, map[string]string{
-		"user_id": user.ID,
-		"name":    user.Name,
-		"email":   user.Email,
-		"role":    string(user.Role),
+	utils.WriteJSON(w, http.StatusOK, UserDetailsResponse{
+		UserID: user.ID,
+		Name:   user.Name,
+		Email:  user.Email,
+		Role:   string(user.Role),
 	})
 }
 
@@ -212,8 +212,8 @@ func (s *Server) getUserDetails(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Security BearerAuth
 // @Param id path string true "User ID"
-// @Success 200 {object} map[string]string "Success"
-// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Success 200 {object} utils.MessageResponse "Success"
+// @Failure 500 {object} utils.ErrorResponse "Internal Server Error"
 // @ID toggleUserStatus
 // @Router /users/{id}/status [patch]
 func (s *Server) toggleUserStatus(w http.ResponseWriter, r *http.Request) {
@@ -225,8 +225,8 @@ func (s *Server) toggleUserStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, map[string]string{
-		"message": "success",
+	utils.WriteJSON(w, http.StatusOK, utils.MessageResponse{
+		Message: "success",
 	})
 }
 
@@ -239,9 +239,9 @@ func (s *Server) toggleUserStatus(w http.ResponseWriter, r *http.Request) {
 // @Security BearerAuth
 // @Param id path string true "User ID"
 // @Param body body object{target_user_role=string} true "Target role details"
-// @Success 200 {object} map[string]string "Success"
-// @Failure 400 {object} map[string]string "Invalid Request Body / Role"
-// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Success 200 {object} utils.MessageResponse "Success"
+// @Failure 400 {object} utils.ErrorResponse "Invalid Request Body / Role"
+// @Failure 500 {object} utils.ErrorResponse "Internal Server Error"
 // @ID setUserRole
 // @Router /users/{id}/role [patch]
 func (s *Server) setUserRole(w http.ResponseWriter, r *http.Request) {
@@ -273,7 +273,7 @@ func (s *Server) setUserRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, map[string]string{
-		"message": "success",
+	utils.WriteJSON(w, http.StatusOK, utils.MessageResponse{
+		Message: "success",
 	})
 }

@@ -5,6 +5,14 @@ import (
 	"net/http"
 )
 
+type ErrorResponse struct {
+	Error string `json:"error" example:"Internal Server Error"`
+}
+
+type MessageResponse struct {
+	Message string `json:"message" example:"success"`
+}
+
 func WriteJSON(w http.ResponseWriter, status int, data any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
@@ -14,5 +22,5 @@ func WriteJSON(w http.ResponseWriter, status int, data any) {
 func WriteError(w http.ResponseWriter, status int, msg string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(map[string]string{"error": msg})
+	json.NewEncoder(w).Encode(ErrorResponse{Error: msg})
 }

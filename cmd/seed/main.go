@@ -1,7 +1,6 @@
 package main
 
 import (
-	"slices"
 	"context"
 	"database/sql"
 	"fmt"
@@ -31,15 +30,27 @@ const (
 func main() {
 	fmt.Printf("%sStarting database seeding...%s\n", ColorCyan, ColorReset)
 
-	// dbHost := os.Getenv("BLUEPRINT_DB_HOST")
-	// dbPort := os.Getenv("BLUEPRINT_DB_PORT")
-	// dbUser := os.Getenv("BLUEPRINT_DB_USERNAME")
-	// dbPass := os.Getenv("BLUEPRINT_DB_PASSWORD")
-	// dbName := os.Getenv("BLUEPRINT_DB_DATABASE")
-	// dbSchema := os.Getenv("BLUEPRINT_DB_SCHEMA")
+	appEnv := strings.ToLower(os.Getenv("APP_ENV"))
+	domain := "local"
+	mdFile := "USERS-LOCAL.md"
+	if appEnv == "prod" {
+		domain = "prod"
+		mdFile = "USERS.md"
+	}
 
-	// connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s", dbUser, dbPass, dbHost, dbPort, dbName, dbSchema)
-	connStr := os.Getenv("DATABASE_URL")
+	dbHost := os.Getenv("BLUEPRINT_DB_HOST")
+	dbPort := os.Getenv("BLUEPRINT_DB_PORT")
+	dbUser := os.Getenv("BLUEPRINT_DB_USERNAME")
+	dbPass := os.Getenv("BLUEPRINT_DB_PASSWORD")
+	dbName := os.Getenv("BLUEPRINT_DB_DATABASE")
+	dbSchema := os.Getenv("BLUEPRINT_DB_SCHEMA")
+	dbUrl := os.Getenv("DATABASE_URL")
+	var connStr string
+	if dbUrl != "" {
+		connStr = dbUrl
+	} else {
+		connStr = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s", dbUser, dbPass, dbHost, dbPort, dbName, dbSchema)
+	}
 	db, err := sql.Open("pgx", connStr)
 	if err != nil {
 		log.Fatalf("%sError opening database: %v%s\n", ColorRed, err, ColorReset)
@@ -48,23 +59,28 @@ func main() {
 
 	ctx := context.Background()
 
-	// 1. Create Users
-	users := []struct {
+	// 1. Create Users within a transaction
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		log.Fatalf("%sError starting user transaction: %v%s\n", ColorRed, err, ColorReset)
+	}
+
+	usersToSeed := []struct {
 		Name     string
 		Email    string
 		Password string
 		Role     database.RoleType
 	}{
-		{"Admin User", "admin@zorvyn.local", "password123", database.RoleAdmin},
-		{"Analyst User", "analyst@zorvyn.local", "password123", database.RoleAnalyst},
-		{"Viewer User", "viewer@zorvyn.local", "password123", database.RoleViewer},
+		{"Admin User", "admin@zorvyn." + domain, "password123", database.RoleAdmin},
+		{"Analyst User", "analyst@zorvyn." + domain, "password123", database.RoleAnalyst},
+		{"Viewer User", "viewer@zorvyn." + domain, "password123", database.RoleViewer},
 	}
 
 	var seededUsers []database.User
 	var responses []string
 
-	for _, u := range users {
-		fmt.Printf("%sCreating user: %s (%s)%s\n", ColorYellow, u.Name, u.Role, ColorReset)
+	for _, u := range usersToSeed {
+		fmt.Printf("%sProcessing user: %s (%s)%s\n", ColorYellow, u.Name, u.Role, ColorReset)
 
 		hash, _ := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 		user := database.User{
@@ -74,16 +90,16 @@ func main() {
 			Role:     u.Role,
 		}
 
-		// Check if user exists
 		var existingID string
-		err := db.QueryRowContext(ctx, "SELECT id FROM users WHERE email = $1", u.Email).Scan(&existingID)
+		err := tx.QueryRowContext(ctx, "SELECT id FROM users WHERE email = $1", u.Email).Scan(&existingID)
 		if err == nil {
-			fmt.Printf("%sUser %s already exists, skipping creation.%s\n", ColorCyan, u.Email, ColorReset)
+			fmt.Printf("%sUser %s already exists, updating ID reference.%s\n", ColorCyan, u.Email, ColorReset)
 			user.ID = existingID
 		} else {
-			err = db.QueryRowContext(ctx, `INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id`,
+			err = tx.QueryRowContext(ctx, `INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id`,
 				user.Name, user.Email, user.Password, user.Role).Scan(&user.ID)
 			if err != nil {
+				tx.Rollback()
 				log.Fatalf("%sError creating user %s: %v%s\n", ColorRed, u.Email, err, ColorReset)
 			}
 			fmt.Printf("%sUser %s created with ID: %s%s\n", ColorGreen, u.Email, user.ID, ColorReset)
@@ -93,6 +109,7 @@ func main() {
 
 		token, err := utils.GenerateJWTToken(user.ID, user.Role)
 		if err != nil {
+			tx.Rollback()
 			log.Fatalf("%sError generating token for %s: %v%s\n", ColorRed, u.Email, err, ColorReset)
 		}
 
@@ -101,45 +118,83 @@ func main() {
 		responses = append(responses, resp)
 	}
 
-	// 2. Write users.md
-	var usersMdContent strings.Builder
-	usersMdContent.WriteString("# Sample Users\n\n")
-	for _, r := range responses {
-		usersMdContent.WriteString(r + "\n")
+	if err = tx.Commit(); err != nil {
+		log.Fatalf("%sError committing user transaction: %v%s\n", ColorRed, err, ColorReset)
 	}
-	err = os.WriteFile("USERS.md", []byte(usersMdContent.String()), 0644)
-	if err != nil {
-		log.Fatalf("%sError writing users.md: %v%s\n", ColorRed, err, ColorReset)
-	}
-	fmt.Printf("%sCreated users.md with sample responses.%s\n", ColorGreen, ColorReset)
 
-	// 3. Seed Records
-	categories := []string{"Food", "Housing", "Transport", "Entertainment", "Utilities", "Salary", "Investment", "Shopping", "Health"}
+	// 2. Write Markdown file
+	var mdContent strings.Builder
+	mdContent.WriteString(fmt.Sprintf("# Sample Users (%s)\n\n", strings.ToUpper(appEnv)))
+	for _, r := range responses {
+		mdContent.WriteString(r + "\n")
+	}
+	if err = os.WriteFile(mdFile, []byte(mdContent.String()), 0644); err != nil {
+		log.Fatalf("%sError writing %s: %v%s\n", ColorRed, mdFile, err, ColorReset)
+	}
+	fmt.Printf("%sCreated %s with sample responses.%s\n", ColorGreen, mdFile, ColorReset)
+
+	// 3. Seed Records with Batched Inserts and Transaction
+	categories := []string{"food", "housing", "transport", "entertainment", "utilities", "salary", "investment", "shopping", "health"}
 	incomeCategories := []string{"salary", "investment"}
 
 	now := time.Now()
 	startDate := now.AddDate(-2, 0, 0)
-
-	totalRecords := 0
-	fmt.Printf("%sSeeding records from %s to %s...%s\n", ColorCyan, startDate.Format("2006-01-02"), now.Format("2006-01-02"), ColorReset)
-
-	// Use Admin User as the owner for the seeded records
 	adminID := seededUsers[0].ID
 
+	fmt.Printf("%sSeeding records from %s to %s...%s\n", ColorCyan, startDate.Format("2006-01-02"), now.Format("2006-01-02"), ColorReset)
+
+	recordTx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		log.Fatalf("%sError starting record transaction: %v%s\n", ColorRed, err, ColorReset)
+	}
+
+	totalRecords := 0
+	batchSize := 100
+	var batch []any
+	
+	// Helper to execute batch insert
+	flushBatch := func(data []any) {
+		if len(data) == 0 {
+			return
+		}
+		numFields := 6
+		numRows := len(data) / numFields
+		placeholderParts := make([]string, numRows)
+		for i := 0; i < numRows; i++ {
+			base := i * numFields
+			placeholderParts[i] = fmt.Sprintf("($%d, $%d, $%d, $%d, $%d, $%d)", 
+				base+1, base+2, base+3, base+4, base+5, base+6)
+		}
+		
+		query := fmt.Sprintf("INSERT INTO records (user_id, amount, txn_type, category, description, date) VALUES %s", 
+			strings.Join(placeholderParts, ","))
+		
+		_, err := recordTx.ExecContext(ctx, query, data...)
+		if err != nil {
+			recordTx.Rollback()
+			log.Fatalf("%sError executing batch insert: %v%s\n", ColorRed, err, ColorReset)
+		}
+	}
+
 	for d := startDate; d.Before(now); d = d.AddDate(0, 1, 0) {
-		recordCount := 30 + rand.Intn(11) // 30-40 records
-		fmt.Printf("%sMonth: %s - Seeding %d records%s\n", ColorYellow, d.Format("2006-01"), recordCount, ColorReset)
+		recordCount := 30 + rand.Intn(11) // 30-40 records per month
+		fmt.Printf("%sMonth: %s - Generating %d records%s\n", ColorYellow, d.Format("2006-01"), recordCount, ColorReset)
 
 		for range recordCount {
-			// Random day in month
 			day := rand.Intn(28) + 1
 			txnDate := time.Date(d.Year(), d.Month(), day, 0, 0, 0, 0, time.UTC)
 			if txnDate.After(now) {
 				txnDate = now
 			}
 
-			category := strings.ToLower(categories[rand.Intn(len(categories))])
-			isIncome := slices.Contains(incomeCategories, category)
+			category := categories[rand.Intn(len(categories))]
+			isIncome := false
+			for _, ic := range incomeCategories {
+				if ic == category {
+					isIncome = true
+					break
+				}
+			}
 
 			txnType := "expense"
 			amount := decimal.NewFromFloat(10.0 + rand.Float64()*100.0)
@@ -149,21 +204,22 @@ func main() {
 			}
 
 			description := fmt.Sprintf("Sample %s for %s", txnType, category)
-
-			_, err = db.ExecContext(ctx, `
-				INSERT INTO records (user_id, amount, txn_type, category, description, date) 
-				SELECT $1, $2, $3, $4, $5, $6
-				WHERE NOT EXISTS (
-					SELECT 1 FROM records 
-					WHERE user_id = $1 AND amount = $2 AND txn_type = $3 
-					AND category = $4 AND date = $6
-				)`,
-				adminID, amount, txnType, category, description, txnDate)
-			if err != nil {
-				log.Fatalf("%sError inserting record: %v%s\n", ColorRed, err, ColorReset)
-			}
+			
+			batch = append(batch, adminID, amount, txnType, category, description, txnDate)
 			totalRecords++
+
+			if len(batch)/6 >= batchSize {
+				flushBatch(batch)
+				batch = nil
+			}
 		}
+	}
+
+	// Final flush
+	flushBatch(batch)
+
+	if err = recordTx.Commit(); err != nil {
+		log.Fatalf("%sError committing record transaction: %v%s\n", ColorRed, err, ColorReset)
 	}
 
 	fmt.Printf("%sSeeding complete! Total records inserted: %d%s\n", ColorGreen, totalRecords, ColorReset)
