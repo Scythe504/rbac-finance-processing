@@ -2,6 +2,8 @@
 
 A robust backend system for managing financial records with Role-Based Access Control (RBAC).
 
+**Live Demo:** [https://rbac-finance.onrender.com](https://rbac-finance.onrender.com)
+
 ## Architecture (Diagram)
 
 [Excalidraw Link](https://excalidraw.com/#json=6Frc6NKOYznbKHCIzV-gS,bDbkl-4JEcNymaVsEsDPVA)
