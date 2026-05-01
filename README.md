@@ -1,6 +1,6 @@
-# Zorvyn RBAC Finance Data Processing API
+# RBAC Finance Processing API
 
-A backend system for managing financial records with Role-Based Access Control, built as a screening assignment for a backend internship role from [zorvyn.io](https://zorvyn.io).
+A robust backend system for managing financial records with Role-Based Access Control (RBAC).
 
 ## Architecture (Diagram)
 
@@ -11,8 +11,8 @@ A backend system for managing financial records with Role-Based Access Control, 
 Requires Docker and Docker Compose.
 
 ```bash
-git clone https://github.com/scythe504/zorvyn-rbac-finance
-cd zorvyn-rbac-finance
+git clone https://github.com/scythe504/rbac-finance-processing
+cd rbac-finance-processing
 cp .env.example .env
 docker compose up
 ```
@@ -38,21 +38,21 @@ Import `docs/openapi.yaml` into Postman for organized routes testing.
 | Admin | ✅ | ✅ | ✅ | ✅ |
 
 ---
-## Assumptions
+## Technical Considerations & Implementation Details
 
-**Single organization** — The system assumes all financial records belong to a single company. A multi-tenant implementation would require an `organizations` table, with users belonging to an organization and records scoped to it via a foreign key. This was out of scope for the assignment.
+**Single organization** — The system currently manages financial records for a single entity. Scaling to multi-tenancy would involve introducing an `organizations` table and scoping all records and users accordingly.
 
-**Registration** — The user registration only supports registering with viewer role, an admin can promote a user to the desired role.
+**Registration** — Default registration assigns the `viewer` role. Administrative users can promote accounts to `analyst` or `admin` as needed.
 
-**Dashboard is company-wide** — Aggregated financial data represents the entire organization, not per-user summaries. All authenticated roles see the same dashboard numbers.
+**Dashboard Scope** — Aggregated financial data represents the entire organization's state. All authenticated roles have access to these high-level metrics.
 
-**`user_id` on records is audit-only** — Records are not ownership-scoped to the user who created them. `user_id` tracks who entered the record for audit purposes, not for access control.
+**Audit Logging** — Records include a `user_id` field specifically for auditing purposes, tracking which administrator or analyst performed the entry.
 
-**Soft delete is one-way via API** — Deleted records can be restored by directly setting `deleted_at` to NULL in the database, but no restore endpoint was implemented as it was not in the requirements.
+**Soft Deletes** — Records utilize soft deletion to preserve data integrity. While they are excluded from standard queries, they remain in the database with a `deleted_at` timestamp.
 
-**Single currency** — No currency field on records. All amounts are assumed to be in the same currency. Multi-currency support would require exchange rate handling.
+**Currency Handling** — Currently assumes a single uniform currency across all transactions. Multi-currency support is a planned extension involving exchange rate tracking.
 
-**No token invalidation** — JWTs are stateless. Logout is handled client-side by discarding the token. A compromised token remains valid until expiry (30 days). Production would require a token blacklist or short expiry with refresh tokens.
+**Stateless Authentication** — Uses JWTs for stateless session management. In a high-security production environment, this would be supplemented with a token revocation list or shorter-lived access tokens with refresh rotations.
 
 ## Design Decisions & Tradeoffs
 

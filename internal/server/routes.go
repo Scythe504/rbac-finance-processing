@@ -4,9 +4,9 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	_ "github.com/scythe504/zorvyn-rbac-finance/docs"
-	"github.com/scythe504/zorvyn-rbac-finance/internal/database"
-	"github.com/scythe504/zorvyn-rbac-finance/internal/utils"
+	_ "github.com/scythe504/rbac-finance-processing/docs"
+	"github.com/scythe504/rbac-finance-processing/internal/database"
+	"github.com/scythe504/rbac-finance-processing/internal/utils"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 

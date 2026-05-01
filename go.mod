@@ -1,4 +1,4 @@
-module github.com/scythe504/zorvyn-rbac-finance
+module github.com/scythe504/rbac-finance-processing
 
 go 1.25.2
 

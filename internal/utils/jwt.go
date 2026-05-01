@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/scythe504/zorvyn-rbac-finance/internal/database"
+	"github.com/scythe504/rbac-finance-processing/internal/database"
 )
 
 type JwtClaims struct {
@@ -23,7 +23,7 @@ func GenerateJWTToken(userID string, role database.RoleType) (string, error) {
 			ExpiresAt: &jwt.NumericDate{
 				Time: time.Now().Add(30 * 24 * time.Hour),
 			},
-			Issuer: "zorvyn-rbac.scythe",
+			Issuer: "rbac-finance-processing.scythe",
 		},
 	}
 

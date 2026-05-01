@@ -1,6 +1,6 @@
 basePath: /api/v1
 definitions:
-  github_com_scythe504_zorvyn-rbac-finance_internal_database.CategoryTotals:
+  github_com_scythe504_rbac-finance-processing_internal_database.CategoryTotals:
     properties:
       category:
         type: string
@@ -9,21 +9,21 @@ definitions:
       income:
         type: string
     type: object
-  github_com_scythe504_zorvyn-rbac-finance_internal_database.DashboardSummary:
+  github_com_scythe504_rbac-finance-processing_internal_database.DashboardSummary:
     properties:
       category_totals:
         items:
-          $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.CategoryTotals'
+          $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_database.CategoryTotals'
         type: array
       grouped_by:
         type: string
       net_balance:
         type: string
       period:
-        $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.PeriodType'
+        $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_database.PeriodType'
       recent_activities:
         items:
-          $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.Record'
+          $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_database.Record'
         type: array
       total_expense:
         type: string
@@ -31,10 +31,10 @@ definitions:
         type: string
       trends_entry:
         items:
-          $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.TrendsEntry'
+          $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_database.TrendsEntry'
         type: array
     type: object
-  github_com_scythe504_zorvyn-rbac-finance_internal_database.HealthStats:
+  github_com_scythe504_rbac-finance-processing_internal_database.HealthStats:
     properties:
       error:
         type: string
@@ -57,7 +57,7 @@ definitions:
       wait_duration:
         type: string
     type: object
-  github_com_scythe504_zorvyn-rbac-finance_internal_database.PeriodType:
+  github_com_scythe504_rbac-finance-processing_internal_database.PeriodType:
     enum:
     - weekly
     - monthly
@@ -69,7 +69,7 @@ definitions:
     - PeriodMonthly
     - PeriodYearly
     - PeriodAllTime
-  github_com_scythe504_zorvyn-rbac-finance_internal_database.Record:
+  github_com_scythe504_rbac-finance-processing_internal_database.Record:
     properties:
       amount:
         type: string
@@ -86,13 +86,13 @@ definitions:
       id:
         type: integer
       txn_type:
-        $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.TxnType'
+        $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_database.TxnType'
       updated_at:
         type: string
       user_id:
         type: string
     type: object
-  github_com_scythe504_zorvyn-rbac-finance_internal_database.RecordFilters:
+  github_com_scythe504_rbac-finance-processing_internal_database.RecordFilters:
     properties:
       ascending:
         type: boolean
@@ -111,7 +111,7 @@ definitions:
       txn_type:
         type: string
     type: object
-  github_com_scythe504_zorvyn-rbac-finance_internal_database.TrendsEntry:
+  github_com_scythe504_rbac-finance-processing_internal_database.TrendsEntry:
     properties:
       date:
         type: string
@@ -120,7 +120,7 @@ definitions:
       income:
         type: string
     type: object
-  github_com_scythe504_zorvyn-rbac-finance_internal_database.TxnType:
+  github_com_scythe504_rbac-finance-processing_internal_database.TxnType:
     enum:
     - income
     - expense
@@ -128,13 +128,13 @@ definitions:
     x-enum-varnames:
     - TxnTypeIncome
     - TxnTypeExpense
-  github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse:
+  github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse:
     properties:
       error:
         example: Internal Server Error
         type: string
     type: object
-  github_com_scythe504_zorvyn-rbac-finance_internal_utils.MessageResponse:
+  github_com_scythe504_rbac-finance-processing_internal_utils.MessageResponse:
     properties:
       message:
         example: success
@@ -173,7 +173,7 @@ definitions:
   internal_server.DashboardResponse:
     properties:
       data:
-        $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.DashboardSummary'
+        $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_database.DashboardSummary'
     type: object
   internal_server.LoginUser:
     properties:
@@ -194,16 +194,16 @@ definitions:
   internal_server.RecordResponse:
     properties:
       data:
-        $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.Record'
+        $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_database.Record'
     type: object
   internal_server.RecordsListResponse:
     properties:
       data:
         items:
-          $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.Record'
+          $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_database.Record'
         type: array
       filters:
-        $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.RecordFilters'
+        $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_database.RecordFilters'
     type: object
   internal_server.RegisterUser:
     properties:
@@ -255,7 +255,7 @@ definitions:
 info:
   contact: {}
   description: API for managing personal finance with Role-Based Access Control.
-  title: Zorvyn RBAC Finance API
+  title: RBAC Finance Processing API
   version: 1.0.0
 paths:
   /:
@@ -268,7 +268,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.MessageResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.MessageResponse'
       summary: Hello World
   /auth/login:
     post:
@@ -293,15 +293,15 @@ paths:
         "400":
           description: Invalid Request Body
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
         "401":
           description: Invalid Credentials
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
       summary: Login a user
       tags:
       - Auth
@@ -328,20 +328,20 @@ paths:
         "400":
           description: Invalid Request Body / Email Address
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
         "401":
           description: Self registration is only available for viewer role. Contact
             an admin for desired role.
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
         "409":
           description: User with email already exists, Please Login
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
       summary: Register a new user
       tags:
       - Auth
@@ -366,11 +366,11 @@ paths:
         "400":
           description: Invalid Query Parameter
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get dashboard summary
@@ -386,7 +386,7 @@ paths:
         "200":
           description: Health status statistics
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.HealthStats'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_database.HealthStats'
       summary: API Health
   /me:
     get:
@@ -404,11 +404,11 @@ paths:
         "404":
           description: User not found
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get user details
@@ -464,11 +464,11 @@ paths:
         "400":
           description: Invalid query parameters
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List records
@@ -496,11 +496,11 @@ paths:
         "400":
           description: Invalid Request Body
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create a record
@@ -524,15 +524,15 @@ paths:
         "200":
           description: Success
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.MessageResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.MessageResponse'
         "400":
           description: Invalid Record ID
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Delete a record
@@ -559,15 +559,15 @@ paths:
         "400":
           description: Invalid Record ID
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
         "404":
           description: Record not found
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get a record
@@ -591,19 +591,19 @@ paths:
         "200":
           description: Success
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.MessageResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.MessageResponse'
         "400":
           description: Invalid Request Body / ID
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
         "404":
           description: Record not found
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update a record
@@ -636,15 +636,15 @@ paths:
         "200":
           description: Success
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.MessageResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.MessageResponse'
         "400":
           description: Invalid Request Body / Role
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Set user role
@@ -668,11 +668,11 @@ paths:
         "200":
           description: Success
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.MessageResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.MessageResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse'
+            $ref: '#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Toggle user status

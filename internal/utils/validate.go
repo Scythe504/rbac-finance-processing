@@ -3,7 +3,7 @@ package utils
 import (
 	"time"
 
-	"github.com/scythe504/zorvyn-rbac-finance/internal/database"
+	"github.com/scythe504/rbac-finance-processing/internal/database"
 )
 
 func IsValidRole(role string) bool {

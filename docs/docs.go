@@ -27,7 +27,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.MessageResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.MessageResponse"
                         }
                     }
                 }
@@ -68,19 +68,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid Request Body",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Invalid Credentials",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     }
                 }
@@ -121,25 +121,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid Request Body / Email Address",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Self registration is only available for viewer role. Contact an admin for desired role.",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "User with email already exists, Please Login",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     }
                 }
@@ -182,13 +182,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid Query Parameter",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     }
                 }
@@ -206,7 +206,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Health status statistics",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.HealthStats"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_database.HealthStats"
                         }
                     }
                 }
@@ -241,13 +241,13 @@ const docTemplate = `{
                     "404": {
                         "description": "User not found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     }
                 }
@@ -332,13 +332,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid query parameters",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     }
                 }
@@ -382,13 +382,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid Request Body",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     }
                 }
@@ -432,19 +432,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid Record ID",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Record not found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     }
                 }
@@ -480,19 +480,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.MessageResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.MessageResponse"
                         }
                     },
                     "400": {
                         "description": "Invalid Record ID",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     }
                 }
@@ -530,25 +530,25 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.MessageResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.MessageResponse"
                         }
                     },
                     "400": {
                         "description": "Invalid Request Body / ID",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Record not found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     }
                 }
@@ -600,19 +600,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.MessageResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.MessageResponse"
                         }
                     },
                     "400": {
                         "description": "Invalid Request Body / Role",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     }
                 }
@@ -650,13 +650,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.MessageResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.MessageResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse"
+                            "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse"
                         }
                     }
                 }
@@ -664,7 +664,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "github_com_scythe504_zorvyn-rbac-finance_internal_database.CategoryTotals": {
+        "github_com_scythe504_rbac-finance-processing_internal_database.CategoryTotals": {
             "type": "object",
             "properties": {
                 "category": {
@@ -678,13 +678,13 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_scythe504_zorvyn-rbac-finance_internal_database.DashboardSummary": {
+        "github_com_scythe504_rbac-finance-processing_internal_database.DashboardSummary": {
             "type": "object",
             "properties": {
                 "category_totals": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.CategoryTotals"
+                        "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_database.CategoryTotals"
                     }
                 },
                 "grouped_by": {
@@ -694,12 +694,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "period": {
-                    "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.PeriodType"
+                    "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_database.PeriodType"
                 },
                 "recent_activities": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.Record"
+                        "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_database.Record"
                     }
                 },
                 "total_expense": {
@@ -711,12 +711,12 @@ const docTemplate = `{
                 "trends_entry": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.TrendsEntry"
+                        "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_database.TrendsEntry"
                     }
                 }
             }
         },
-        "github_com_scythe504_zorvyn-rbac-finance_internal_database.HealthStats": {
+        "github_com_scythe504_rbac-finance-processing_internal_database.HealthStats": {
             "type": "object",
             "properties": {
                 "error": {
@@ -751,7 +751,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_scythe504_zorvyn-rbac-finance_internal_database.PeriodType": {
+        "github_com_scythe504_rbac-finance-processing_internal_database.PeriodType": {
             "type": "string",
             "enum": [
                 "weekly",
@@ -766,7 +766,7 @@ const docTemplate = `{
                 "PeriodAllTime"
             ]
         },
-        "github_com_scythe504_zorvyn-rbac-finance_internal_database.Record": {
+        "github_com_scythe504_rbac-finance-processing_internal_database.Record": {
             "type": "object",
             "properties": {
                 "amount": {
@@ -791,7 +791,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "txn_type": {
-                    "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.TxnType"
+                    "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_database.TxnType"
                 },
                 "updated_at": {
                     "type": "string"
@@ -801,7 +801,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_scythe504_zorvyn-rbac-finance_internal_database.RecordFilters": {
+        "github_com_scythe504_rbac-finance-processing_internal_database.RecordFilters": {
             "type": "object",
             "properties": {
                 "ascending": {
@@ -830,7 +830,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_scythe504_zorvyn-rbac-finance_internal_database.TrendsEntry": {
+        "github_com_scythe504_rbac-finance-processing_internal_database.TrendsEntry": {
             "type": "object",
             "properties": {
                 "date": {
@@ -844,7 +844,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_scythe504_zorvyn-rbac-finance_internal_database.TxnType": {
+        "github_com_scythe504_rbac-finance-processing_internal_database.TxnType": {
             "type": "string",
             "enum": [
                 "income",
@@ -855,7 +855,7 @@ const docTemplate = `{
                 "TxnTypeExpense"
             ]
         },
-        "github_com_scythe504_zorvyn-rbac-finance_internal_utils.ErrorResponse": {
+        "github_com_scythe504_rbac-finance-processing_internal_utils.ErrorResponse": {
             "type": "object",
             "properties": {
                 "error": {
@@ -864,7 +864,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_scythe504_zorvyn-rbac-finance_internal_utils.MessageResponse": {
+        "github_com_scythe504_rbac-finance-processing_internal_utils.MessageResponse": {
             "type": "object",
             "properties": {
                 "message": {
@@ -919,7 +919,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.DashboardSummary"
+                    "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_database.DashboardSummary"
                 }
             }
         },
@@ -951,7 +951,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.Record"
+                    "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_database.Record"
                 }
             }
         },
@@ -961,11 +961,11 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.Record"
+                        "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_database.Record"
                     }
                 },
                 "filters": {
-                    "$ref": "#/definitions/github_com_scythe504_zorvyn-rbac-finance_internal_database.RecordFilters"
+                    "$ref": "#/definitions/github_com_scythe504_rbac-finance-processing_internal_database.RecordFilters"
                 }
             }
         },
@@ -1053,7 +1053,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "/api/v1",
 	Schemes:          []string{"http", "https"},
-	Title:            "Zorvyn RBAC Finance API",
+	Title:            "RBAC Finance Processing API",
 	Description:      "API for managing personal finance with Role-Based Access Control.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

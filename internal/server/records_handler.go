@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/scythe504/zorvyn-rbac-finance/internal/database"
-	"github.com/scythe504/zorvyn-rbac-finance/internal/utils"
+	"github.com/scythe504/rbac-finance-processing/internal/database"
+	"github.com/scythe504/rbac-finance-processing/internal/utils"
 	"github.com/shopspring/decimal"
 )
 

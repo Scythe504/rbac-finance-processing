@@ -8,8 +8,8 @@ Requires Go version 1.25.2
 > [![Go](https://img.shields.io/badge/Go-%2300ADD8.svg?style=for-the-badge&logo=go&logoColor=white)](https://go.dev/dl/)
 
 ```sh
-$ git clone https://github.com/scythe504/zorvyn-rbac-finance.git
-$ cd zorvyn-rbac-finance
+$ git clone https://github.com/scythe504/rbac-finance-processing.git
+$ cd rbac-finance-processing
 $ cp .env.example .env
 ```
 

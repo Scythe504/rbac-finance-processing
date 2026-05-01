@@ -1,4 +1,4 @@
-// @title Zorvyn RBAC Finance API
+// @title RBAC Finance Processing API
 // @version 1.0.0
 // @description API for managing personal finance with Role-Based Access Control.
 // @BasePath /api/v1
@@ -18,7 +18,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/scythe504/zorvyn-rbac-finance/internal/server"
+	"github.com/scythe504/rbac-finance-processing/internal/server"
 )
 
 func gracefulShutdown(apiServer *http.Server, done chan bool) {

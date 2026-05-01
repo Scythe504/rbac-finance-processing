@@ -12,8 +12,8 @@ import (
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/scythe504/zorvyn-rbac-finance/internal/database"
-	"github.com/scythe504/zorvyn-rbac-finance/internal/utils"
+	"github.com/scythe504/rbac-finance-processing/internal/database"
+	"github.com/scythe504/rbac-finance-processing/internal/utils"
 	"github.com/shopspring/decimal"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -71,9 +71,9 @@ func main() {
 		Password string
 		Role     database.RoleType
 	}{
-		{"Admin User", "admin@zorvyn." + domain, "password123", database.RoleAdmin},
-		{"Analyst User", "analyst@zorvyn." + domain, "password123", database.RoleAnalyst},
-		{"Viewer User", "viewer@zorvyn." + domain, "password123", database.RoleViewer},
+		{"Admin User", "admin@rbac-finance." + domain, "password123", database.RoleAdmin},
+		{"Analyst User", "analyst@rbac-finance." + domain, "password123", database.RoleAnalyst},
+		{"Viewer User", "viewer@rbac-finance." + domain, "password123", database.RoleViewer},
 	}
 
 	var seededUsers []database.User

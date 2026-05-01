@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/scythe504/zorvyn-rbac-finance/internal/database"
+	"github.com/scythe504/rbac-finance-processing/internal/database"
 )
 
 type DashboardResponse struct {

@@ -1,7 +1,7 @@
 # Sample Users (PROD)
 
 ## Admin User (admin)
-- **Email:** admin@zorvyn.prod
+- **Email:** admin@rbac-finance.prod
 - **Password:** password123
 - **Response:**
 ```json
@@ -12,7 +12,7 @@
 ```
 
 ## Analyst User (analyst)
-- **Email:** analyst@zorvyn.prod
+- **Email:** analyst@rbac-finance.prod
 - **Password:** password123
 - **Response:**
 ```json
@@ -23,7 +23,7 @@
 ```
 
 ## Viewer User (viewer)
-- **Email:** viewer@zorvyn.prod
+- **Email:** viewer@rbac-finance.prod
 - **Password:** password123
 - **Response:**
 ```json
